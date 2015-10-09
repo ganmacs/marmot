@@ -1,0 +1,5 @@
+## Installtion
+
+```sh
+$ sbt run
+```
