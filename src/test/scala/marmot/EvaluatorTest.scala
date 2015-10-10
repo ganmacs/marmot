@@ -27,6 +27,11 @@ class EvaluatorTest extends FunSpec {
         assert(evalLine("let x = 1 in x + (let x = 10 in x + x) ") == IntValue(21))
       }
     }
+
+    describe("fun") {
+      assert(evalLine("let a = fun x y -> x + y in a (1 2)") == IntValue(3))
+      assert(evalLine("let x = 1 in let f = fun y -> x + y in f (10)") == IntValue(11))
+    }
   }
 
   def evalLine(in: String): Value = {

@@ -24,6 +24,8 @@ trait Tokens {
   val ELSE = "else"
   val LET = "let"
   val IN = "in"
+  val FUN = "fun"
+  val RARROW = "->"
 
   val TRUE = "true"
   val FALSE = "false"

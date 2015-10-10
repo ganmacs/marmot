@@ -37,6 +37,17 @@ object Evaluator {
       val newEnv = Env.build(env, (n, eval(value, env)))
       eval(body, newEnv)
     }
+    case Fun(ags, body) => FunValue(ags, body, env)
+    case App(name, exprs) => eval(name, env) match {
+      case FunValue(ags, body, lEnv) => {
+        val argValues = exprs.map(eval(_, env))
+        val argLit = ags.map(_.v)
+        val newEnv = lEnv.updateWithPairs(argLit, argValues)
+        eval(body, newEnv)
+      }
+      case _ => throw new Exception(s"$name is not a function")
+    }
+
     case _ => throw new Exception(s"unknow term $e")
   }
 }

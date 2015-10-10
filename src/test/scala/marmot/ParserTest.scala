@@ -37,6 +37,17 @@ class ParserTest extends FunSpec {
     describe("let return Prim obj") {
       assert(parseLine("let x = 1 in x") == Let(VarLit("x"), IntLit(1), VarLit("x")))
     }
+
+    describe("fun return Fun obj") {
+      assert(parseLine("fun x y -> x + y") ==
+        Fun(List(VarLit("x"), VarLit("y")),
+          Prim(Op("+"), VarLit("x"), VarLit("y"))))
+    }
+
+    describe("app return App obj") {
+      assert(parseLine("f (1 2)") ==
+        App(VarLit("f"), List(IntLit(1), IntLit(2))))
+    }
   }
 
   def parseLine(in: String) =

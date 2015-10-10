@@ -20,4 +20,9 @@ case class Env[T](
     }
     case x => x
   }
+  def updateWithPairs(keys: List[String], values: List[T]) = {
+    val ne = keys.zip(values).toMap
+    e ++= ne
+    this
+  }
 }
