@@ -16,16 +16,16 @@ object Evaluator {
     }
     case Prim(op, e1, e2) => (eval(e1, env), eval(e2, env)) match {
       case (IntValue(x), IntValue(y)) => op match {
-        case Op("+")=> IntValue(x + y)
-        case Op("-")=> IntValue(x - y)
-        case Op("*")=> IntValue(x * y)
-        case Op("/")=> IntValue(x / y)
+        case Op("+") => IntValue(x + y)
+        case Op("-") => IntValue(x - y)
+        case Op("*") => IntValue(x * y)
+        case Op("/") => IntValue(x / y)
       }
       case (DoubleValue(x), DoubleValue(y)) => op match {
-        case Op("+.")=> DoubleValue(x + y)
-        case Op("-.")=> DoubleValue(x - y)
-        case Op("*.")=> DoubleValue(x * y)
-        case Op("/.")=> DoubleValue(x / y)
+        case Op("+.") => DoubleValue(x + y)
+        case Op("-.") => DoubleValue(x - y)
+        case Op("*.") => DoubleValue(x * y)
+        case Op("/.") => DoubleValue(x / y)
       }
       case (_, _) => throw new Exception("Unmatched type")
     }
