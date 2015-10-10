@@ -1,4 +1,4 @@
-package maromot
+package marmot
 
 import org.scalatest.FunSpec
 
