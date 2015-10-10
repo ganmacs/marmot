@@ -23,7 +23,7 @@ case class Prim(op: Op, e1: Expr, e2: Expr) extends Expr {
   override def toString() = s"($op $e1 $e2)"
 }
 
-case class If(cond: Expr, e1: Expr, e2: Expr) extends Expr {
+case class IfExp(cond: Expr, e1: Expr, e2: Expr) extends Expr {
   override def toString() = s"(if $cond $e1 $e2)"
 }
 

@@ -32,7 +32,7 @@ class ParserTest extends FunSpec {
 
     describe("if") {
       it("return if exp") {
-        assert(parseLine("if true then 2 else 1") == If(BoolLit(true), IntLit(2), IntLit(1)))
+        assert(parseLine("if true then 2 else 1") == IfExp(BoolLit(true), IntLit(2), IntLit(1)))
       }
     }
   }

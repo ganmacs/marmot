@@ -16,9 +16,9 @@ object Parser extends RegexParsers with PackratParsers with Tokens {
     case id ~ value ~ body => Let(id, value, body)
   }
 
-  private lazy val ifexp: PackratParser[If] = (IF ~> expr) ~ (THEN ~> expr) ~ (ELSE ~> expr) ^^ {
-    case c ~ e1 ~ e2 => If(c, e1, e2)
-      }
+  private lazy val ifexp: PackratParser[IfExp] = (IF ~> expr) ~ (THEN ~> expr) ~ (ELSE ~> expr) ^^ {
+    case c ~ e1 ~ e2 => IfExp(c, e1, e2)
+  }
 
   private lazy val term: PackratParser[Expr] =
     fact ~ termR.* ^^ { case l ~ r => makeBinExpr(l, r) }
