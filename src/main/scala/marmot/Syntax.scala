@@ -1,3 +1,5 @@
+package maromot
+
 case class Op(v: String) {
   override def toString() = v
 }

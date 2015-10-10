@@ -1,3 +1,5 @@
+package maromot
+
 import util.parsing.combinator.{RegexParsers, PackratParsers}
 
 object Parser extends RegexParsers with PackratParsers with Tokens {

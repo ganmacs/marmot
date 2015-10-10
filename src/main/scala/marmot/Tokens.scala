@@ -1,3 +1,5 @@
+package maromot
+
 trait Tokens {
   val INT = """(0|[1-9][0-9]*)""".r
   val DOUBLE =  """(0|[1-9][0-9]*)\.[0-9]+""".r

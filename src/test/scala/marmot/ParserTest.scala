@@ -1,3 +1,5 @@
+package maromot
+
 import org.scalatest.FunSpec
 
 class ParserTest extends FunSpec {
