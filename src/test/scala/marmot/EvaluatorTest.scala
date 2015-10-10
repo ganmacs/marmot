@@ -22,6 +22,10 @@ class EvaluatorTest extends FunSpec {
 
     describe("let") {
       assert(evalLine("let x = 1 in x") == IntValue(1))
+
+      it ("has scope") {
+        assert(evalLine("let x = 1 in x + (let x = 10 in x + x) ") == IntValue(21))
+      }
     }
   }
 

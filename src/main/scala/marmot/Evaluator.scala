@@ -34,7 +34,7 @@ object Evaluator {
       case BoolValue(false) => eval(e2, env)
     }
     case Let(VarLit(n), value, body) => {
-      val newEnv = env.put(n, eval(value, env))
+      val newEnv = Env.build(env, (n, eval(value, env)))
       eval(body, newEnv)
     }
     case _ => throw new Exception(s"unknow term $e")
