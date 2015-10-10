@@ -1,4 +1,4 @@
-package maromot
+package marmot
 
 import util.parsing.combinator.{RegexParsers, PackratParsers}
 
@@ -30,10 +30,7 @@ object Parser extends RegexParsers with PackratParsers with Tokens {
   private lazy val int = INT ^^ { case e => IntLit(e.toInt) }
   private lazy val double = DOUBLE ^^ { case e => DoubleLit(e.toDouble) }
   private lazy val id = ID ^^ { case e => VarLit(e) }
-  private lazy val bool = (TRUE | FALSE) ^^ {
-    case "true" => BoolLit(true)
-    case "false" =>  BoolLit(false)
-  }
+  private lazy val bool = TRUE ^^ { case _ => BoolLit(true) } | FALSE ^^ { case _ => BoolLit(false) }
 
   private lazy val exprR  = (FADD | FSUB | ADD | SUB) ~ term ^^ { case op ~ f => (Op(op), f) }
   private lazy val termR  = (FMUL | FDIV | MUL | DIV) ~ fact ^^ { case op ~ f => (Op(op), f) }

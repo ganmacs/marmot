@@ -1,4 +1,4 @@
-package maromot
+package marmot
 
 case class Op(v: String) {
   override def toString() = v

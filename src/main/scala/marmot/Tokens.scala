@@ -1,4 +1,4 @@
-package maromot
+package marmot
 
 trait Tokens {
   val INT = """(0|[1-9][0-9]*)""".r

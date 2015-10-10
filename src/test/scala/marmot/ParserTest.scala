@@ -25,17 +25,17 @@ class ParserTest extends FunSpec {
       }
     }
 
-    describe("Prim") {
-      it("return Primee") {
-        assert(parseLine("1 + 2") == Prim(Op("+"), IntLit(1), IntLit(2)))
-        assert(parseLine("1.2 +. 2.0") == Prim(Op("+."), DoubleLit(1.2), DoubleLit(2.0)))
-      }
+    describe("Prim return Prim obj") {
+      assert(parseLine("1 + 2") == Prim(Op("+"), IntLit(1), IntLit(2)))
+      assert(parseLine("1.2 +. 2.0") == Prim(Op("+."), DoubleLit(1.2), DoubleLit(2.0)))
     }
 
-    describe("if") {
-      it("return if exp") {
-        assert(parseLine("if true then 2 else 1") == IfExp(BoolLit(true), IntLit(2), IntLit(1)))
-      }
+    describe("if return Prim obj") {
+      assert(parseLine("if true then 2 else 1") == IfExp(BoolLit(true), IntLit(2), IntLit(1)))
+    }
+
+    describe("let return Prim obj") {
+      assert(parseLine("let x = 1 in x") == Let(VarLit("x"), IntLit(1), VarLit("x")))
     }
   }
 
