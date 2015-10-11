@@ -1,6 +1,8 @@
-package marmot
+package marmot.parser
 
 import org.scalatest.FunSpec
+import marmot._
+import marmot.parser._
 
 class ParserTest extends FunSpec {
   describe("One Line script") {
@@ -50,9 +52,12 @@ class ParserTest extends FunSpec {
     }
   }
 
-  def parseLine(in: String) =
-    Parser.parse(in) match {
+
+  def parseLine(in: String) = {
+    val parser = new Parser
+    parser.parse(in) match {
       case Right(Prog(x)) => x.apply(0)
       case Left(x) => throw new Exception(x)
     }
+  }
 }

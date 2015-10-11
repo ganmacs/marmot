@@ -1,9 +1,9 @@
-package marmot
+package marmot.parser.extensions
 
-import util.parsing.combinator.{RegexParsers, PackratParsers}
+import marmot._
 
-object Parser extends RegexParsers with PackratParsers with Tokens {
-  def parse(in: String) = parseAll(stmnt, in) match {
+class BasicParser extends BaseParser {
+  def parse(in: String): Either[String, Prog] = parseAll(stmnt, in) match {
     case Success(d, next) => Right(d)
     case NoSuccess(errorMsg, next) =>
       Left(s"$errorMsg : in ${next.pos.line} at column ${next.pos.column}")

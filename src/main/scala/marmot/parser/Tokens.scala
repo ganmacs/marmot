@@ -1,9 +1,14 @@
-package marmot
+package marmot.parser
 
 trait Tokens {
   val INT = """(0|[1-9][0-9]*)""".r
   val DOUBLE =  """(0|[1-9][0-9]*)\.[0-9]+""".r
   val ID = """[a-z][a-zA-Z0-9]*""".r
+
+  val MACRO = "macrodef"
+  val TEXPR = "$EXPR"
+  val TTERM = "$TERM"
+  val TFACT = "$FACT"
 
   val LPAREN = "("
   val RPAREN = ")"
