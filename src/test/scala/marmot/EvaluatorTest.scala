@@ -31,6 +31,7 @@ class EvaluatorTest extends FunSpec {
     describe("fun") {
       assert(evalLine("let a = fun x y -> x + y in a (1 2)") == IntValue(3))
       assert(evalLine("let x = 1 in let f = fun y -> x + y in f (10)") == IntValue(11))
+      assert(evalLine("let x = 1 in let f = fun y -> (fun z -> z + x + y) in let k = f (10) in k (20)") == IntValue(31))
     }
   }
 

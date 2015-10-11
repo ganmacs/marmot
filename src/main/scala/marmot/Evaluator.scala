@@ -47,7 +47,6 @@ object Evaluator {
       }
       case _ => throw new Exception(s"$name is not a function")
     }
-
     case _ => throw new Exception(s"unknow term $e")
   }
 }

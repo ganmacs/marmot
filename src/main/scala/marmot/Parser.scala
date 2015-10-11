@@ -12,7 +12,7 @@ object Parser extends RegexParsers with PackratParsers with Tokens {
   private lazy val stmnt: PackratParser[Prog] = (expr).* ^^ { case e => Prog(e) }
 
   private lazy val expr: PackratParser[Expr] =
-    fun | ifexp |  let | app | term ~ exprR.* ^^ { case l ~ r => makeBinExpr(l, r) }
+    fun | ifexp | let | app | term ~ exprR.* ^^ { case l ~ r => makeBinExpr(l, r) }
 
   private lazy val let: PackratParser[Let] = (LET ~> id) ~ (EQ ~> expr) ~ (IN ~> expr) ^^ {
     case id ~ value ~ body => Let(id, value, body)
