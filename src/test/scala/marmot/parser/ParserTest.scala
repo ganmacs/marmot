@@ -3,9 +3,10 @@ package marmot.parser
 import org.scalatest.FunSpec
 import marmot._
 import marmot.parser._
+import scala.io.Source
 
 class ParserTest extends FunSpec {
-  describe("One Line script") {
+  describe ("Basic Parser") {
     describe("Literal") {
       it ("returns IntLit wrapped value") {
         assert(parseLine("1") == IntLit(1))
@@ -52,11 +53,37 @@ class ParserTest extends FunSpec {
     }
   }
 
-
-  def parseLine(in: String) = {
+  describe("Macro Parser") {
     val parser = new Parser
-    parser.parse(in) match {
-      case Right(Prog(x)) => x.apply(0)
+    val lines  = readfile("src/test/resouces/macrofile")
+
+    val x = parser.parse(lines(0), 1) match {
+      case Right(Prog(x)) => x(0)
+      case Left(x) => throw new Exception(x)
+    }
+    val y = parser.parse(lines(1), 0) match {
+      case Right(Prog(x)) => x(0)
+      case Left(x) => throw new Exception(x)
+    }
+
+    println(y)
+  }
+
+  describe ("tri") {
+  }
+
+
+  def readfile(filename: String) = {
+    val source = Source.fromFile(filename)
+    val lines = source.getLines.toList
+    lines
+    // lines.tail.foldLeft(lines.head) { (a, e) => a + "\n" + e }
+  }
+
+  def parseLine(in: String, i: Int = 0) = {
+    val parser = new Parser
+    parser.parse(in, i) match {
+      case Right(Prog(x)) => x(0)
       case Left(x) => throw new Exception(x)
     }
   }

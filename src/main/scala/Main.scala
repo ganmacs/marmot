@@ -1,4 +1,4 @@
-import marmot.Parser
+import marmot.parser.Parser
 
 object Main {
   def main(args: Array[String]) {
