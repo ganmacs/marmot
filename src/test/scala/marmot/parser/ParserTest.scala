@@ -70,6 +70,21 @@ class ParserTest extends FunSpec {
   }
 
   describe ("tri") {
+    println("---tri---")
+    val parser = new Parser
+    val lines  = readfile("src/test/resouces/tri")
+
+    val x = parser.parse(lines(0), 1) match {
+      case Right(Prog(x)) => x(0)
+      case Left(x) => throw new Exception(x)
+    }
+    val y = parser.parse(lines(1), 0) match {
+      case Right(Prog(x)) => x(0)
+      case Left(x) => throw new Exception(x)
+    }
+    println("==========")
+    println(y)
+    println("==========")
   }
 
 

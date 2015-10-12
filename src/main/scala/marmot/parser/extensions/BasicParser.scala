@@ -26,6 +26,11 @@ class BasicParser extends BaseParser {
       case Some(ex) => ex
       case None => v // not macro, so return default value
     }
+    case Prim(x, e1, e2) => {
+      val ne1 = expandMacro(e1, env)
+      val ne2 = expandMacro(e2, env)
+      Prim(x, ne1, ne2)
+    }
     case IfExp(cond, e1, e2) => {
       val nc = expandMacro(cond, env)
       val ne1 = expandMacro(e1, env)
@@ -39,29 +44,18 @@ class BasicParser extends BaseParser {
     case NoTermToken("$EXPR") => {
       val macroEnv = Env.empty[Expr]
 
-      val parserTerm = convertExprToParser(exprs, macroEnv)
+      val parsers = convertExprToParser(exprs, macroEnv)
 
-      var b = parserTerm.tail.foldLeft(parserTerm.head) {
+      var b = parsers.tail.foldLeft(parsers.head) {
         (a, b) => a ~ b ^^ { case a ~ b => ENil() }
       }
 
-      b = b ^^ {
-        case e => expandMacro(semntics, macroEnv)
-      }
-
-      expr = b | expr
-      println("-------register------")
+      expr = b ^^ { case e => expandMacro(semntics, macroEnv) } | expr
     }
     case NoTermToken("$TERM") =>
     case NoTermToken("$FACT") =>
     case _ => Nil
   }
-
-  // val c = ("unless" ~> bool) ~ ("then" ~  expr) ~ ("else" ~> expr) ^^ {
-  //   case e ~ e1 ~ e2 =>
-  //     println(e)
-  //     ENil()
-  // }
 
   private lazy val stmnt: PackratParser[Prog] = (expr).* ^^ { case e => Prog(e) }
 
