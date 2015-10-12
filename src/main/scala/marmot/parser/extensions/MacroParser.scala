@@ -10,22 +10,19 @@ class MacroParser(val targetParser: BasicParser) extends BaseParser with MacroTo
   }
 
   private lazy val tx: PackratParser[NoTermToken] =
-    (TEXPR | TTERM | TFACT) ^^ { e => NoTermToken(e) }
-
+    (TEXPR | TTERM | TFACT) ^^ { NoTermToken(_) }
 
   private lazy val defmacro: PackratParser[Expr] =
     (MACRO ~> LB ~> tx <~ RB) ~ (LPAREN ~> stmnt <~ RPAREN) ~ (LBR ~> mExpr <~ RBR) ^^ {
-      case t ~ s ~ b =>
-        this.targetParser.registerRule(t, s.v, b)
-        ENil()
+      case t ~ s ~ b => this.targetParser.registerRule(t, s.v, b); Empty()
     }
 
-  private lazy val stmnt: PackratParser[Prog] = (mExpr).* ^^ { case e => Prog(e) }
+  private lazy val stmnt: PackratParser[Prog] = (mExpr).* ^^ { Prog(_) }
 
   private lazy val mExpr: PackratParser[Expr] =
-    variable | defmacro | mFun | mIf | mLet | mApp | mTerm ~ exprR.* ^^ { case l ~ r => makeBinExpr(l, r) }
+    macroVar | defmacro | mFun | mIf | mLet | mApp | mTerm ~ exprR.* ^^ { case l ~ r => makeBinExpr(l, r) }
 
-  private lazy val variable: PackratParser[Expr] = (COMMA ~> id) ~ (SEMI ~> tx) ^^ {
+  private lazy val macroVar: PackratParser[Expr] = (COMMA ~> id) ~ (SEMI ~> tx) ^^ {
     case e ~ t => MacroVar(e, t)
   }
 
@@ -54,7 +51,7 @@ class MacroParser(val targetParser: BasicParser) extends BaseParser with MacroTo
 
   private lazy val int = INT ^^ { case e => IntLit(e.toInt) }
   private lazy val double = DOUBLE ^^ { case e => DoubleLit(e.toDouble) }
-  private lazy val id = ID ^^ { case e => VarLit(e) }
+  private lazy val id = ID ^^ { VarLit(_) }
   private lazy val bool = TRUE ^^ { case _ => BoolLit(true) } | FALSE ^^ { case _ => BoolLit(false) }
 
   private lazy val exprR  = (FADD | FSUB | ADD | SUB) ~ mTerm ^^ { case op ~ f => (Op(op), f) }

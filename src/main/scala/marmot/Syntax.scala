@@ -5,7 +5,7 @@ case class Op(v: String) {
 }
 
 sealed trait Expr
-case class ENil() extends Expr
+case class Empty() extends Expr
 case class IntLit(v: Int) extends Expr
 case class DoubleLit(v: Double) extends Expr
 case class BoolLit(v: Boolean) extends Expr

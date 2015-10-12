@@ -10,15 +10,15 @@ class BasicParser extends BaseParser {
   }
 
   def convertExprToParser(e: List[Expr], env: Env[Expr]): List[Parser[Expr]] = e.map {
-    case VarLit(x) => x ^^ { case e => ENil() }
+    case VarLit(x) => x ^^ { case e => Empty() }
     case IntLit(_) => int
     case NoTermToken("$EXPR") => expr
     case NoTermToken("$TERM") => term
     case NoTermToken("$FACT")=> fact
-    case MacroVar(VarLit(x), NoTermToken("$EXPR")) => expr ^^ { case e => env.put(x, e); ENil() }
-    case MacroVar(VarLit(x), NoTermToken("$TERM")) => term ^^ { case e => env.put(x, e); ENil() }
-    case MacroVar(VarLit(x), NoTermToken("$FACT")) => fact ^^ { case e => env.put(x, e); ENil() }
-    case _ => "" ^^ { case _ => ENil() }
+    case MacroVar(VarLit(x), NoTermToken("$EXPR")) => expr ^^ { case e => env.put(x, e); Empty() }
+    case MacroVar(VarLit(x), NoTermToken("$TERM")) => term ^^ { case e => env.put(x, e); Empty() }
+    case MacroVar(VarLit(x), NoTermToken("$FACT")) => fact ^^ { case e => env.put(x, e); Empty() }
+    case _ => "" ^^ { case _ => Empty() }
   }
 
   def expandMacro(expr: Expr, env: Env[Expr]): Expr = expr match {
@@ -47,7 +47,7 @@ class BasicParser extends BaseParser {
       val parsers = convertExprToParser(exprs, macroEnv)
 
       var b = parsers.tail.foldLeft(parsers.head) {
-        (a, b) => a ~ b ^^ { case a ~ b => ENil() }
+        (a, b) => a ~ b ^^ { case a ~ b => Empty() }
       }
 
       expr = b ^^ { case e => expandMacro(semntics, macroEnv) } | expr
