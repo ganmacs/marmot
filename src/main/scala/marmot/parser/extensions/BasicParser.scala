@@ -9,7 +9,7 @@ class BasicParser extends BaseParser {
       Left(s"$errorMsg : in ${next.pos.line} at column ${next.pos.column}")
   }
 
-  def convertExprToParser(e: List[Expr], env: Env[Expr]): List[Parser[Expr]] = e.map {
+  private def convertExprToParser(e: List[Expr], env: Env[Expr]): List[Parser[Expr]] = e.map {
     case VarLit(x) => x ^^ { case e => Empty() }
     case IntLit(_) => int
     case NoTermToken("$EXPR") => expr
@@ -21,7 +21,7 @@ class BasicParser extends BaseParser {
     case _ => "" ^^ { case _ => Empty() }
   }
 
-  def expandMacro(expr: Expr, env: Env[Expr]): Expr = expr match {
+  private def expandMacro(expr: Expr, env: Env[Expr]): Expr = expr match {
     case v@VarLit(x) => env.get(x) match {
       case Some(ex) => ex
       case None => v // not macro, so return default value
