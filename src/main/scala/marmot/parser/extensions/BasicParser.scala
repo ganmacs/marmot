@@ -12,6 +12,9 @@ class BasicParser extends BaseParser {
   private def convertExprToParser(e: List[Expr], env: Env[Expr]): List[Parser[Expr]] = e.map {
     case VarLit(x) => x ^^ { case e => Empty() }
     case IntLit(_) => int
+    case DoubleLit(_) => double
+    case BoolLit(_) => bool
+    case Prim(x, e1, e2) => bool
     case NoTermToken("$EXPR") => expr
     case NoTermToken("$TERM") => term
     case NoTermToken("$FACT")=> fact
@@ -37,12 +40,18 @@ class BasicParser extends BaseParser {
       val ne2 = expandMacro(e2, env)
       IfExp(nc, ne1, ne2)
     }
+    case Fun(args, body) => {
+      val nargs = args.map { e => expandMacro(e, env).asInstanceOf[VarLit] }
+      val nbody = expandMacro(body, env)
+      Fun(nargs, nbody)
+    }
     case e => e
   }
 
   def registerRule(t: NoTermToken, exprs: List[Expr], semntics: Expr) = t match {
     case NoTermToken("$EXPR") => {
       val macroEnv = Env.empty[Expr]
+      println(exprs)
 
       val parsers = convertExprToParser(exprs, macroEnv)
 
@@ -50,7 +59,8 @@ class BasicParser extends BaseParser {
         (a, b) => a ~ b ^^ { case a ~ b => Empty() }
       }
 
-      expr = b ^^ { case e => expandMacro(semntics, macroEnv) } | expr
+      val tmp = expr
+      expr = b ^^ { case e => expandMacro(semntics, macroEnv) } | tmp
     }
     case NoTermToken("$TERM") =>
     case NoTermToken("$FACT") =>

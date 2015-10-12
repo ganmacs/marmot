@@ -87,6 +87,24 @@ class ParserTest extends FunSpec {
     println("==========")
   }
 
+  describe ("lambda") {
+    println("---lambda---")
+    val parser = new Parser
+    val lines  = readfile("src/test/resouces/lambda")
+
+    val x = parser.parse(lines(0), 1) match {
+      case Right(Prog(x)) => x(0)
+      case Left(x) => throw new Exception(x)
+    }
+    println(x)
+    val y = parser.parse(lines(1), 0) match {
+      case Right(Prog(x)) => x(0)
+      case Left(x) => throw new Exception(x)
+    }
+    println("==========")
+    println(y)
+    println("==========")
+  }
 
   def readfile(filename: String) = {
     val source = Source.fromFile(filename)
