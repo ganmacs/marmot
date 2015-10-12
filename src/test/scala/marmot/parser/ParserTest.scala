@@ -53,64 +53,71 @@ class ParserTest extends FunSpec {
     }
   }
 
-  describe("Macro Parser") {
-    val parser = new Parser
-    val lines  = readfile("src/test/resouces/macrofile")
+  describe("Macro definition") {
+    describe("Macro Parser") {
+      val parser = new Parser
+      val lines  = readfile("src/test/resouces/macro")
 
-    val x = parser.parse(lines(0), 1) match {
-      case Right(Prog(x)) => x(0)
-      case Left(x) => throw new Exception(x)
-    }
-    val y = parser.parse(lines(1), 0) match {
-      case Right(Prog(x)) => x(0)
-      case Left(x) => throw new Exception(x)
+      parser.parse(lines(0), 1) match {
+        case Right(Prog(x)) => { assert( x(0) == Empty()) }
+        case Left(x) => throw new Exception(x)
+      }
+      parser.parse(lines(1), 0) match {
+        case Right(Prog(x)) => {
+          assert(x(0) == IfExp(BoolLit(true), IntLit(8), IntLit(9)))
+        }
+        case Left(x) => throw new Exception(x)
+      }
     }
 
-    println(y)
-  }
+    describe ("tri") {
+      val parser = new Parser
+      val lines  = readfile("src/test/resouces/tri")
 
-  describe ("tri") {
-    println("---tri---")
-    val parser = new Parser
-    val lines  = readfile("src/test/resouces/tri")
+      parser.parse(lines(0), 1) match {
+        case Right(Prog(x)) => { assert( x(0) == Empty()) }
+        case Left(x) => throw new Exception(x)
+      }
+      val y = parser.parse(lines(1), 0) match {
+        case Right(Prog(x)) => {
+          assert(x(0) ==
+            Prim(Op("*"), IntLit(2),
+              Prim(Op("+"),
+                Prim(Op("+"), IntLit(1), IntLit(2)),
+                IntLit(4))
+            )
+          )
+        }
+        case Left(x) => throw new Exception(x)
+      }
+    }
 
-    val x = parser.parse(lines(0), 1) match {
-      case Right(Prog(x)) => x(0)
-      case Left(x) => throw new Exception(x)
-    }
-    val y = parser.parse(lines(1), 0) match {
-      case Right(Prog(x)) => x(0)
-      case Left(x) => throw new Exception(x)
-    }
-    println("==========")
-    println(y)
-    println("==========")
-  }
+    describe ("lambda") {
+      val parser = new Parser
+      val lines  = readfile("src/test/resouces/lambda")
 
-  describe ("lambda") {
-    println("---lambda---")
-    val parser = new Parser
-    val lines  = readfile("src/test/resouces/lambda")
-
-    val x = parser.parse(lines(0), 1) match {
-      case Right(Prog(x)) => x(0)
-      case Left(x) => throw new Exception(x)
+      parser.parse(lines(0), 1) match {
+        case Right(Prog(x)) => { assert( x(0) == Empty()) }
+        case Left(x) => throw new Exception(x)
+      }
+      parser.parse(lines(1), 0) match {
+        case Right(Prog(x)) => {
+          assert(x(0) ==
+            Let(
+              VarLit("x"),
+              Fun(List(VarLit("x")), Prim(Op("+"),VarLit("x"),IntLit(1))),
+              App(VarLit("x"),List(IntLit(4))))
+          )
+        }
+        case Left(x) => throw new Exception(x)
+      }
     }
-    println(x)
-    val y = parser.parse(lines(1), 0) match {
-      case Right(Prog(x)) => x(0)
-      case Left(x) => throw new Exception(x)
-    }
-    println("==========")
-    println(y)
-    println("==========")
   }
 
   def readfile(filename: String) = {
     val source = Source.fromFile(filename)
     val lines = source.getLines.toList
     lines
-    // lines.tail.foldLeft(lines.head) { (a, e) => a + "\n" + e }
   }
 
   def parseLine(in: String, i: Int = 0) = {

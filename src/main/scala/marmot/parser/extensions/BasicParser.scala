@@ -51,7 +51,6 @@ class BasicParser extends BaseParser {
   def registerRule(t: NoTermToken, exprs: List[Expr], semntics: Expr) = t match {
     case NoTermToken("$EXPR") => {
       val macroEnv = Env.empty[Expr]
-      println(exprs)
 
       val parsers = convertExprToParser(exprs, macroEnv)
 

@@ -1,2 +1,2 @@
 defmacro[$EXPR] (,e1:$EXPR add ,e2:$EXPR ,e3:$EXPR) { e1 + e2 + e3 }
-1 add 2 4 * 1
+2 * (1 add 2 4)
