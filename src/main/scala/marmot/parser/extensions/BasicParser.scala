@@ -48,7 +48,7 @@ class BasicParser extends BaseParser {
     case e => e
   }
 
-  def registerRule(t: NoTermToken, exprs: List[Expr], semntics: Expr) = t match {
+  def registerRule(t: NoTermToken, exprs: List[Expr], semntics: Expr): Unit = t match {
     case NoTermToken("$EXPR") => {
       val macroEnv = Env.empty[Expr]
 
@@ -63,7 +63,7 @@ class BasicParser extends BaseParser {
     }
     case NoTermToken("$TERM") =>
     case NoTermToken("$FACT") =>
-    case _ => Nil
+    case _ => throw new Exception(s"Unknown target token ${t.v}")
   }
 
   private lazy val stmnt: PackratParser[Prog] = (expr).* ^^ { case e => Prog(e) }

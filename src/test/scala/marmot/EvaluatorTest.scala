@@ -36,7 +36,6 @@ class EvaluatorTest extends FunSpec {
     }
   }
 
-
   def evalLine(in: String): Value = {
     val parser = new Parser
     parser.parse(in) match {
