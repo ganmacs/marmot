@@ -1,6 +1,7 @@
 package marmot
 
 import org.scalatest.FunSpec
+import marmot.parser._
 
 class EvaluatorTest extends FunSpec {
   describe("One Line")  {
@@ -36,14 +37,16 @@ class EvaluatorTest extends FunSpec {
   }
 
   def evalLine(in: String): Value = {
-    Parser.parse(in) match {
+    val parser = new Parser
+    parser.parse(in) match {
       case Right(Prog(x)) => Evaluator.evalAll(x.apply(0), Env.empty).apply(0)
       case Left(x) => throw new Exception(s"""parse error $x\n""")
     }
   }
 
   def eval(in: String): List[Value] = {
-    Parser.parse(in) match {
+    val parser = new Parser
+    parser.parse(in) match {
       case Right(Prog(x)) => Evaluator.evalAll(x.apply(0), Env.empty)
       case Left(x) => throw new Exception(s"""parse error $x\n""")
     }

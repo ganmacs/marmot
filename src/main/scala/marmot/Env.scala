@@ -25,4 +25,13 @@ case class Env[T](
     e ++= ne
     this
   }
+
+  override def toString = {
+    var s = "( "
+    for ((k,v) <- e) {
+      s += s"$k => $v, "
+    }
+    s+")"
+  }
+
 }

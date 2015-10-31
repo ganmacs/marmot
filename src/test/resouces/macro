@@ -1,0 +1,2 @@
+defmacro[$EXPR] (unless ,c:$EXPR then ,e1:$EXPR else ,e2:$EXPR) { if c then e2 else e1 }
+unless true then 9 else 8
