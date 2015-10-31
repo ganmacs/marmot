@@ -1,0 +1,7 @@
+define(APPLY ,arg TO ,functin WEHRE ,cond) {
+  if cond then (function arg) else arg
+}
+defop(,e1 tap ,e2) {
+   e1
+}
+let i = 1 in let f = fun (x) -> x + 2 in APPLY i TO f WHERE (i tap 0)

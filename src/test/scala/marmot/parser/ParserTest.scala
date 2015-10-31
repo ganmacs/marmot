@@ -53,6 +53,25 @@ class ParserTest extends FunSpec {
     }
   }
 
+  describe("Operator definition") {
+    describe("operator Parser") {
+      val parser = new Parser
+      val lines  = readfile("src/test/resouces/operator")
+
+      parser.parse(lines(0), 2) match {
+        case Right(Prog(x)) => { assert( x(0) == Empty()) }
+        case Left(x) => throw new Exception(x)
+      }
+      parser.parse(lines(1), 0) match {
+        case Right(Prog(x)) => {
+          println(x(0))
+          assert(x(0) == IfExp(BoolLit(true), IntLit(8), IntLit(9)))
+        }
+        case Left(x) => throw new Exception(x)
+      }
+    }
+  }
+
   describe("Macro definition") {
     describe("Macro Parser") {
       val parser = new Parser
