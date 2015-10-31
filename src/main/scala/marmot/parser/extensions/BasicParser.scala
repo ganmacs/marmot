@@ -55,7 +55,7 @@ class BasicParser extends BaseParser {
       val parsers = convertExprToParser(exprs, macroEnv)
 
       var b = parsers.tail.foldLeft(parsers.head) {
-        (a, b) => a ~ b ^^ { case a ~ b => Empty() }
+        (a, b) => a ~ b ^^^ Empty()
       }
 
       val tmp = expr
