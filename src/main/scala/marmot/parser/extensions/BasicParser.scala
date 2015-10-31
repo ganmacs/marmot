@@ -22,7 +22,7 @@ class BasicParser extends Expandable {
 
   private lazy val stmnt: PackratParser[Prog] = (expr).* ^^ { case e => Prog(e) }
 
-  override var expr: PackratParser[Expr] =
+  var expr: PackratParser[Expr] =
     fun | ifexp | let | app | term ~ exprR.* ^^ { case l ~ r => makeBinExpr(l, r) }
 
   lazy val let: PackratParser[Let] = (LET ~> id) ~ (EQ ~> expr) ~ (IN ~> expr) ^^ {
@@ -48,10 +48,10 @@ class BasicParser extends Expandable {
 
   val fact: PackratParser[Expr] = bool | double | int | id | LPAREN ~> expr <~ RPAREN
 
-  lazy override val int: PackratParser[Expr] = INT ^^ { case e => IntLit(e.toInt) }
-  lazy override val double: PackratParser[Expr] = DOUBLE ^^ { case e => DoubleLit(e.toDouble) }
-  lazy override val id: PackratParser[VarLit] = ID ^^ { case e => VarLit(e) }
-  lazy override val bool: PackratParser[Expr] = TRUE ^^ { case _ => BoolLit(true) } | FALSE ^^ { case _ => BoolLit(false) }
+  lazy val int: PackratParser[Expr] = INT ^^ { case e => IntLit(e.toInt) }
+  lazy val double: PackratParser[Expr] = DOUBLE ^^ { case e => DoubleLit(e.toDouble) }
+  lazy val id: PackratParser[VarLit] = ID ^^ { case e => VarLit(e) }
+  lazy val bool: PackratParser[Expr] = TRUE ^^ { case _ => BoolLit(true) } | FALSE ^^ { case _ => BoolLit(false) }
 
   private lazy val exprR  = (FADD | FSUB | ADD | SUB) ~ term ^^ { case op ~ f => (Op(op), f) }
   private lazy val termR  = (FMUL | FDIV | MUL | DIV) ~ fact ^^ { case op ~ f => (Op(op), f) }
