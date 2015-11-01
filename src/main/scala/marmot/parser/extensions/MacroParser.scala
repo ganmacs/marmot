@@ -14,7 +14,10 @@ class MacroParser(val targetParser: BasicParser) extends BaseParser with MacroTo
 
   private lazy val defmacro: PackratParser[Expr] =
     (MACRO ~> LB ~> tx <~ RB) ~ (LPAREN ~> stmnt <~ RPAREN) ~ (LBR ~> mExpr <~ RBR) ^^ {
-      case t ~ s ~ b => this.targetParser.registerRule(t, s.v, b); Empty()
+      case NoTermToken("$EXPR") ~ s ~ b => this.targetParser.expand(s.v, b); Empty()
+      case NoTermToken("$TERM") ~ s ~ b => this.targetParser.expand(s.v, b); Empty()
+      case NoTermToken("$FACT") ~ s ~ b => this.targetParser.expand(s.v, b); Empty()
+      case t ~ _ ~ _ => throw new Exception(s"Unknown target token ${t.v}")
     }
 
   private lazy val stmnt: PackratParser[Prog] = (mExpr).* ^^ { Prog(_) }
