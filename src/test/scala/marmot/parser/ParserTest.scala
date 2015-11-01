@@ -98,13 +98,9 @@ class ParserTest extends FunSpec {
     }
 
     def readfileAll(filename: String): String = {
-      readfile(filename).mkString("\n")
-    }
-
-    def readfile(filename: String) = {
       val source = Source.fromFile(filename)
       val lines = source.getLines.toList
-      lines
+      lines.mkString("\n")
     }
   }
 

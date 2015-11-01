@@ -4,8 +4,8 @@ import marmot._
 
 // TODO change expandable trait
 class ExpandableParser extends BasicParser {
-  var xParser: ExpandableParser = null
-  private lazy val p: ExpandableParser = if (xParser != null) xParser else this
+  var xParser: Option[ExpandableParser] = None
+  private lazy val p: ExpandableParser = xParser.getOrElse(this)
 
   private def convertToParsers(exprs: List[Expr], env: Env[Expr]): List[Parser[Expr]] =
     exprs.map {
@@ -55,7 +55,7 @@ class ExpandableParser extends BasicParser {
     buildParser(exprs, semantics) match {
       case (_parser, _env) => {
         val _tmp = expr
-        this.expr = _parser ^^ { case _ => expandMacro(semantics, _env) } | _tmp
+        expr = _parser ^^ { case _ => expandMacro(semantics, _env) } | _tmp
       }
     }
   }

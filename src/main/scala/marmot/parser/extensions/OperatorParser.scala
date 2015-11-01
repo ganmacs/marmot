@@ -9,7 +9,7 @@ import marmot._
 class OperatorParser extends ExpandableParser with OperatorToken {
   private val _tmp = expr
   expr = opVar | _tmp
-  xParser = new ExpandableParser
+  xParser = Some(new ExpandableParser)
 
   private lazy val defexpr: PackratParser[Prog] = (expr).* ^^ { case e => Prog(e) }
   private lazy val stmnt: PackratParser[Expr] = defop | define
@@ -19,7 +19,7 @@ class OperatorParser extends ExpandableParser with OperatorToken {
 
   private def defop: PackratParser[Expr] =
     (DEFOP ~> LPAREN ~> defexpr <~ RPAREN) ~ (LBR ~> expr <~ RBR) ^^ {
-      case syntax ~ body => xParser.expandWith(syntax.v, body); Empty()
+      case syntax ~ body => xParser.get.expandWith(syntax.v, body); Empty()
     }
 
   private def define: PackratParser[Expr] =
