@@ -2,15 +2,8 @@ package marmot.parser.extensions
 
 import marmot._
 
-trait Expandable extends BaseParser {
-  val int: PackratParser[Expr]
-  val double: PackratParser[Expr]
-  val id: PackratParser[VarLit]
-  val bool: PackratParser[Expr]
-  var expr: PackratParser[Expr]
-  val fact: PackratParser[Expr]
-  val term: PackratParser[Expr]
-
+// TODO change expandable trait
+class ExpandableParser extends BasicParser {
   private def convertToParsers(exprs: List[Expr], env: Env[Expr]): List[Parser[Expr]] = exprs.map {
     case VarLit(x) => x ^^ { case e => Empty() }
     case IntLit(_) => int
@@ -51,20 +44,20 @@ trait Expandable extends BaseParser {
     case e => e
   }
 
-  def buildParser(exprs: List[Expr], semantics: Expr): (PackratParser[Expr], Env[Expr]) = {
+  private def buildParser(exprs: List[Expr], semantics: Expr): (PackratParser[Expr], Env[Expr]) = {
     val operatorEnv = Env.empty[Expr]
     val parsers = convertToParsers(exprs, operatorEnv)
     val _parser = parsers.tail.foldLeft(parsers.head) {
       (a, b) => a ~ b ^^^ Empty()
     }
-    return (_parser, operatorEnv)
+    (_parser, operatorEnv)
   }
 
-  def expand(exprs: List[Expr], semantics: Expr): Unit = {
+  def expandWith(exprs: List[Expr], semantics: Expr): Unit = {
     buildParser(exprs, semantics) match {
-      case (_parser, env) => {
-        val tmp = expr
-        expr = _parser ^^ { case e => expandMacro(semantics, env) } | tmp
+      case (_parser, _env) => {
+        val _tmp = expr
+        this.expr = _parser ^^ { case _ => expandMacro(semantics, _env) } | _tmp
       }
     }
   }

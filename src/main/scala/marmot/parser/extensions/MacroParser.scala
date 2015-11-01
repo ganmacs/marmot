@@ -2,7 +2,7 @@ package marmot.parser.extensions
 
 import marmot._
 
-class MacroParser(val targetParser: BasicParser) extends BaseParser with MacroToken {
+class MacroParser(val targetParser: ExpandableParser) extends BaseParser with MacroToken {
   def parse(in: String): Either[String, Prog] = parseAll(stmnt, in) match {
     case Success(d, next) => Right(d)
     case NoSuccess(errorMsg, next) =>
@@ -14,9 +14,9 @@ class MacroParser(val targetParser: BasicParser) extends BaseParser with MacroTo
 
   private lazy val defmacro: PackratParser[Expr] =
     (MACRO ~> LB ~> tx <~ RB) ~ (LPAREN ~> stmnt <~ RPAREN) ~ (LBR ~> mExpr <~ RBR) ^^ {
-      case NoTermToken("$EXPR") ~ s ~ b => this.targetParser.expand(s.v, b); Empty()
-      case NoTermToken("$TERM") ~ s ~ b => this.targetParser.expand(s.v, b); Empty()
-      case NoTermToken("$FACT") ~ s ~ b => this.targetParser.expand(s.v, b); Empty()
+      case NoTermToken("$EXPR") ~ s ~ b => this.targetParser.expandWith(s.v, b); Empty()
+      case NoTermToken("$TERM") ~ s ~ b => this.targetParser.expandWith(s.v, b); Empty()
+      case NoTermToken("$FACT") ~ s ~ b => this.targetParser.expandWith(s.v, b); Empty()
       case t ~ _ ~ _ => throw new Exception(s"Unknown target token ${t.v}")
     }
 

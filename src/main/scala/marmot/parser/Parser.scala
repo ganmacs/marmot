@@ -3,10 +3,10 @@ package marmot.parser
 import marmot.parser.extensions._
 
 class Parser {
-  private lazy val basicParser = new BasicParser
-  private lazy val macroParser = new MacroParser(basicParser)
-  private lazy val operaotrParser = new OperatorParser(basicParser)
-  private lazy val parsers: List[BaseParser] = List(basicParser, macroParser, operaotrParser)
+  private lazy val expandableParser = new ExpandableParser
+  private lazy val macroParser = new MacroParser(expandableParser)
+  private lazy val operaotrParser = new OperatorParser(expandableParser)
+  private lazy val parsers: List[BaseParser] = List(expandableParser, macroParser, operaotrParser)
 
   def parse(in: String, i: Int = 0) = parsers(i).parse(in)
 
