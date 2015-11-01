@@ -53,6 +53,51 @@ class ParserTest extends FunSpec {
     }
   }
 
+  describe("Operator definition") {
+    def parseWithOprator(filename: String): Either[String, Prog] = {
+      val parser = new Parser
+      val buff = readfileAll(filename)
+      parser.parseWithOperator(buff)
+    }
+
+    describe("defi operator Parser") {
+      parseWithOprator("src/test/resouces/operator") match {
+        case Right(Prog(x)) => {
+          assert(x(0) == Empty())
+          assert(x(1) == IfExp(BoolLit(true), IntLit(8), IntLit(9)))
+        }
+        case Left(x) => throw new Exception(x)
+      }
+    }
+
+    describe("select Parser") {
+      parseWithOprator("src/test/resouces/select") match {
+        case Right(Prog(x)) => {
+          assert(x(0) == Empty())
+          assert(x(1) == Empty())
+          assert(x(2) == IfExp(BoolLit(true), IntLit(10), Prim(Op("+"), IntLit(9), IntLit(10))))
+        }
+        case Left(x) => throw new Exception(x)
+      }
+    }
+
+    describe("expr_error line") {
+      val ret =  parseWithOprator("src/test/resouces/expr_error") match {
+        case Right(Prog(x)) => "success"
+        case Left(_) => "false"
+      }
+      assert(ret == "false")
+    }
+
+    describe("scope_operator Parser") {
+      val ret =  parseWithOprator("src/test/resouces/scope_operator") match {
+        case Right(Prog(x)) => "success"
+        case Left(_) => "false"
+      }
+      assert(ret == "false")
+    }
+  }
+
   describe("Macro definition") {
     describe("Macro Parser") {
       val parser = new Parser
@@ -114,6 +159,10 @@ class ParserTest extends FunSpec {
     }
   }
 
+  def readfileAll(filename: String): String = {
+    readfile(filename).mkString("\n")
+  }
+
   def readfile(filename: String) = {
     val source = Source.fromFile(filename)
     val lines = source.getLines.toList
@@ -122,7 +171,7 @@ class ParserTest extends FunSpec {
 
   def parseLine(in: String, i: Int = 0) = {
     val parser = new Parser
-    parser.parse(in, i) match {
+    parser.parse(in + ";", i) match {
       case Right(Prog(x)) => x(0)
       case Left(x) => throw new Exception(x)
     }
