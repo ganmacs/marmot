@@ -4,8 +4,8 @@ import marmot._
 
 // TODO change expandable trait
 class ExpandableParser extends BasicParser {
-  var xParser: ExpandableParser = null
-  private lazy val p: ExpandableParser = if (xParser != null) xParser else this
+  var xParser: Option[ExpandableParser] = None
+  private lazy val p: ExpandableParser = xParser.getOrElse(this)
 
   private def convertToParsers(exprs: List[Expr], env: Env[Expr]): List[Parser[Expr]] =
     exprs.map {
@@ -14,13 +14,7 @@ class ExpandableParser extends BasicParser {
       case DoubleLit(_) => p.double.asInstanceOf[Parser[Expr]]
       case BoolLit(_) => p.bool.asInstanceOf[Parser[Expr]]
       case Prim(x, e1, e2) => p.bool.asInstanceOf[Parser[Expr]]
-      case NoTermToken("$EXPR") => xParser.expr.asInstanceOf[Parser[Expr]]
-      case NoTermToken("$TERM") => xParser.term.asInstanceOf[Parser[Expr]]
-      case NoTermToken("$FACT")=> p.fact.asInstanceOf[Parser[Expr]]
       case OperatorVar(VarLit(x))=> p.expr.asInstanceOf[Parser[Expr]] ^^ { case e => env.put(x, e); Empty() }
-      case MacroVar(VarLit(x), NoTermToken("$EXPR")) => p.expr.asInstanceOf[Parser[Expr]] ^^ { case e => env.put(x, e); Empty() }
-      case MacroVar(VarLit(x), NoTermToken("$TERM")) => p.term.asInstanceOf[Parser[Expr]] ^^ { case e => env.put(x, e); Empty() }
-      case MacroVar(VarLit(x), NoTermToken("$FACT")) => p.fact.asInstanceOf[Parser[Expr]] ^^ { case e => env.put(x, e); Empty() }
       case _ => "" ^^ { case _ => Empty() }
     }
 
@@ -61,7 +55,7 @@ class ExpandableParser extends BasicParser {
     buildParser(exprs, semantics) match {
       case (_parser, _env) => {
         val _tmp = expr
-        this.expr = _parser ^^ { case _ => expandMacro(semantics, _env) } | _tmp
+        expr = _parser ^^ { case _ => expandMacro(semantics, _env) } | _tmp
       }
     }
   }

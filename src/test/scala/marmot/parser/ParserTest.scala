@@ -54,12 +54,6 @@ class ParserTest extends FunSpec {
   }
 
   describe("Operator definition") {
-    def parseWithOprator(filename: String): Either[String, Prog] = {
-      val parser = new Parser
-      val buff = readfileAll(filename)
-      parser.parseWithOperator(buff)
-    }
-
     describe("defi operator Parser") {
       parseWithOprator("src/test/resouces/operator") match {
         case Right(Prog(x)) => {
@@ -96,82 +90,23 @@ class ParserTest extends FunSpec {
       }
       assert(ret == "false")
     }
-  }
 
-  describe("Macro definition") {
-    describe("Macro Parser") {
+    def parseWithOprator(filename: String): Either[String, Prog] = {
       val parser = new Parser
-      val lines  = readfile("src/test/resouces/macro")
-
-      parser.parse(lines(0), 1) match {
-        case Right(Prog(x)) => { assert( x(0) == Empty()) }
-        case Left(x) => throw new Exception(x)
-      }
-      parser.parse(lines(1), 0) match {
-        case Right(Prog(x)) => {
-          assert(x(0) == IfExp(BoolLit(true), IntLit(8), IntLit(9)))
-        }
-        case Left(x) => throw new Exception(x)
-      }
+      val buff = readfileAll(filename)
+      parser.parseWithOperator(buff)
     }
 
-    describe ("tri") {
-      val parser = new Parser
-      val lines  = readfile("src/test/resouces/tri")
-
-      parser.parse(lines(0), 1) match {
-        case Right(Prog(x)) => { assert( x(0) == Empty()) }
-        case Left(x) => throw new Exception(x)
-      }
-      val y = parser.parse(lines(1), 0) match {
-        case Right(Prog(x)) => {
-          assert(x(0) ==
-            Prim(Op("*"), IntLit(2),
-              Prim(Op("+"),
-                Prim(Op("+"), IntLit(1), IntLit(2)),
-                IntLit(4))
-            )
-          )
-        }
-        case Left(x) => throw new Exception(x)
-      }
-    }
-
-    describe ("lambda") {
-      val parser = new Parser
-      val lines  = readfile("src/test/resouces/lambda")
-
-      parser.parse(lines(0), 1) match {
-        case Right(Prog(x)) => { assert( x(0) == Empty()) }
-        case Left(x) => throw new Exception(x)
-      }
-      parser.parse(lines(1), 0) match {
-        case Right(Prog(x)) => {
-          assert(x(0) ==
-            Let(
-              VarLit("x"),
-              Fun(List(VarLit("x")), Prim(Op("+"),VarLit("x"),IntLit(1))),
-              App(VarLit("x"),List(IntLit(4))))
-          )
-        }
-        case Left(x) => throw new Exception(x)
-      }
+    def readfileAll(filename: String): String = {
+      val source = Source.fromFile(filename)
+      val lines = source.getLines.toList
+      lines.mkString("\n")
     }
   }
 
-  def readfileAll(filename: String): String = {
-    readfile(filename).mkString("\n")
-  }
-
-  def readfile(filename: String) = {
-    val source = Source.fromFile(filename)
-    val lines = source.getLines.toList
-    lines
-  }
-
-  def parseLine(in: String, i: Int = 0) = {
+  def parseLine(in: String) = {
     val parser = new Parser
-    parser.parse(in + ";", i) match {
+    parser.parse(in + ";") match {
       case Right(Prog(x)) => x(0)
       case Left(x) => throw new Exception(x)
     }
