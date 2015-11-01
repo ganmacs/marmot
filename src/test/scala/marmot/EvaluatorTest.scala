@@ -31,6 +31,7 @@ class EvaluatorTest extends FunSpec {
 
     describe("fun") {
       assert(evalLine("let a = fun x y -> x + y in a (1 2)") == IntValue(3))
+      assert(evalLine("let a = fun x y -> x + y in (a (1 2)) + 1") == IntValue(4))
       assert(evalLine("let x = 1 in let f = fun y -> x + y in f (10)") == IntValue(11))
       assert(evalLine("let x = 1 in let f = fun y -> (fun z -> z + x + y) in let k = f (10) in k (20)") == IntValue(31))
     }
@@ -38,8 +39,8 @@ class EvaluatorTest extends FunSpec {
 
   def evalLine(in: String): Value = {
     val parser = new Parser
-    parser.parse(in) match {
-      case Right(Prog(x)) => Evaluator.evalAll(x.apply(0), Env.empty).apply(0)
+    parser.parse(in + ";") match {
+      case Right(Prog(x)) => Evaluator.evalAll(x(0), Env.empty)(0)
       case Left(x) => throw new Exception(s"""parse error $x\n""")
     }
   }
@@ -47,7 +48,7 @@ class EvaluatorTest extends FunSpec {
   def eval(in: String): List[Value] = {
     val parser = new Parser
     parser.parse(in) match {
-      case Right(Prog(x)) => Evaluator.evalAll(x.apply(0), Env.empty)
+      case Right(Prog(x)) => Evaluator.evalAll(x(0), Env.empty)
       case Left(x) => throw new Exception(s"""parse error $x\n""")
     }
   }
