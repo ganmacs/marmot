@@ -1,2 +1,0 @@
-defmacro[$EXPR] (\ ,c:$EXPR -> ,body:$EXPR) { fun c -> body }
-let x = \x -> x + 1 in x (4);

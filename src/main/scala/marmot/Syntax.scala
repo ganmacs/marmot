@@ -16,6 +16,4 @@ case class Prim(op: Op, e1: Expr, e2: Expr) extends Expr
 case class IfExp(cond: Expr, e1: Expr, e2: Expr) extends Expr
 case class Let(id: VarLit, value: Expr, body: Expr) extends Expr
 case class Prog(v: List[Expr]) extends Expr
-case class NoTermToken(v: String) extends Expr
-case class MacroVar(varname: VarLit, termToken: NoTermToken) extends Expr
 case class OperatorVar(varname: VarLit) extends Expr

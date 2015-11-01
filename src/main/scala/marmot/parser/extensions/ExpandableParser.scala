@@ -14,13 +14,7 @@ class ExpandableParser extends BasicParser {
       case DoubleLit(_) => p.double.asInstanceOf[Parser[Expr]]
       case BoolLit(_) => p.bool.asInstanceOf[Parser[Expr]]
       case Prim(x, e1, e2) => p.bool.asInstanceOf[Parser[Expr]]
-      case NoTermToken("$EXPR") => xParser.expr.asInstanceOf[Parser[Expr]]
-      case NoTermToken("$TERM") => xParser.term.asInstanceOf[Parser[Expr]]
-      case NoTermToken("$FACT")=> p.fact.asInstanceOf[Parser[Expr]]
       case OperatorVar(VarLit(x))=> p.expr.asInstanceOf[Parser[Expr]] ^^ { case e => env.put(x, e); Empty() }
-      case MacroVar(VarLit(x), NoTermToken("$EXPR")) => p.expr.asInstanceOf[Parser[Expr]] ^^ { case e => env.put(x, e); Empty() }
-      case MacroVar(VarLit(x), NoTermToken("$TERM")) => p.term.asInstanceOf[Parser[Expr]] ^^ { case e => env.put(x, e); Empty() }
-      case MacroVar(VarLit(x), NoTermToken("$FACT")) => p.fact.asInstanceOf[Parser[Expr]] ^^ { case e => env.put(x, e); Empty() }
       case _ => "" ^^ { case _ => Empty() }
     }
 
