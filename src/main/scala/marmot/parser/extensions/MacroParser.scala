@@ -25,7 +25,7 @@ class MacroParser(val targetParser: ExpandableParser) extends BaseParser with Ma
   private lazy val mExpr: PackratParser[Expr] =
     macroVar | defmacro | mFun | mIf | mLet | mApp | mTerm ~ exprR.* ^^ { case l ~ r => makeBinExpr(l, r) }
 
-  private lazy val macroVar: PackratParser[Expr] = (COMMA ~> id) ~ (SEMI ~> tx) ^^ {
+  private lazy val macroVar: PackratParser[Expr] = (COMMA ~> id) ~ (COLON ~> tx) ^^ {
     case e ~ t => MacroVar(e, t)
   }
 

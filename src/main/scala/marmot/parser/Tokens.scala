@@ -6,7 +6,8 @@ trait Tokens {
   val ID = """[a-z][a-zA-Z0-9]*""".r
 
   val COMMA = ","
-  val SEMI = ":"
+  val COLON = ":"
+  val SCOLON = ";"
   val LPAREN = "("
   val RPAREN = ")"
   val LB = "["
