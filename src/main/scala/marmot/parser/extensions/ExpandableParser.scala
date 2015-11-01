@@ -4,21 +4,25 @@ import marmot._
 
 // TODO change expandable trait
 class ExpandableParser extends BasicParser {
-  private def convertToParsers(exprs: List[Expr], env: Env[Expr]): List[Parser[Expr]] = exprs.map {
-    case VarLit(x) => x ^^ { case e => Empty() }
-    case IntLit(_) => int
-    case DoubleLit(_) => double
-    case BoolLit(_) => bool
-    case Prim(x, e1, e2) => bool
-    case NoTermToken("$EXPR") => expr
-    case NoTermToken("$TERM") => term
-    case NoTermToken("$FACT")=> fact
-    case OperatorVar(VarLit(x))=> expr ^^ { case e => env.put(x, e); Empty() }
-    case MacroVar(VarLit(x), NoTermToken("$EXPR")) => expr ^^ { case e => env.put(x, e); Empty() }
-    case MacroVar(VarLit(x), NoTermToken("$TERM")) => term ^^ { case e => env.put(x, e); Empty() }
-    case MacroVar(VarLit(x), NoTermToken("$FACT")) => fact ^^ { case e => env.put(x, e); Empty() }
-    case _ => "" ^^ { case _ => Empty() }
-  }
+  var xParser: ExpandableParser = null
+  private lazy val p: ExpandableParser = if (xParser != null) xParser else this
+
+  private def convertToParsers(exprs: List[Expr], env: Env[Expr]): List[Parser[Expr]] =
+    exprs.map {
+      case VarLit(x) => x ^^ { case e => Empty() }
+      case IntLit(_) => p.int.asInstanceOf[Parser[Expr]]
+      case DoubleLit(_) => p.double.asInstanceOf[Parser[Expr]]
+      case BoolLit(_) => p.bool.asInstanceOf[Parser[Expr]]
+      case Prim(x, e1, e2) => p.bool.asInstanceOf[Parser[Expr]]
+      case NoTermToken("$EXPR") => xParser.expr.asInstanceOf[Parser[Expr]]
+      case NoTermToken("$TERM") => xParser.term.asInstanceOf[Parser[Expr]]
+      case NoTermToken("$FACT")=> p.fact.asInstanceOf[Parser[Expr]]
+      case OperatorVar(VarLit(x))=> p.expr.asInstanceOf[Parser[Expr]] ^^ { case e => env.put(x, e); Empty() }
+      case MacroVar(VarLit(x), NoTermToken("$EXPR")) => p.expr.asInstanceOf[Parser[Expr]] ^^ { case e => env.put(x, e); Empty() }
+      case MacroVar(VarLit(x), NoTermToken("$TERM")) => p.term.asInstanceOf[Parser[Expr]] ^^ { case e => env.put(x, e); Empty() }
+      case MacroVar(VarLit(x), NoTermToken("$FACT")) => p.fact.asInstanceOf[Parser[Expr]] ^^ { case e => env.put(x, e); Empty() }
+      case _ => "" ^^ { case _ => Empty() }
+    }
 
   private def expandMacro(expr: Expr, env: Env[Expr]): Expr = expr match {
     case v@VarLit(x) => env.get(x) match {

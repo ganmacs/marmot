@@ -1,3 +1,7 @@
-define(apply ,arg to ,functin where ,cond) { if cond then function arg else arg }
-defop(,e1 tap ,e2) { e1 }
-let i = 1 in let f = fun (x) -> x + 2 in APPLY i TO f WHERE i tap 0
+defi(select ,e1 or ,e2 where ,cond) {
+  if cond then e1 else e2
+}
+defop(add ,e1 ,e2) {
+  e1 + e2
+}
+select 10 or (add 9 10) where true;

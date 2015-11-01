@@ -3,12 +3,6 @@ package marmot.parser.extensions
 import marmot._
 
 class BasicParser extends BaseParser {
-  def parse(in: String): Either[String, Prog] = parseAll(stmnt, in) match {
-    case Success(d, next) => Right(d)
-    case NoSuccess(errorMsg, next) =>
-      Left(s"$errorMsg : in ${next.pos.line} at column ${next.pos.column}")
-  }
-
   lazy val int: PackratParser[Expr] = INT ^^ { case e => IntLit(e.toInt) }
   lazy val double: PackratParser[Expr] = DOUBLE ^^ { case e => DoubleLit(e.toDouble) }
   lazy val id: PackratParser[VarLit] = ID ^^ { case e => VarLit(e) }
@@ -17,15 +11,17 @@ class BasicParser extends BaseParser {
   protected lazy val exprR  = (FADD | FSUB | ADD | SUB) ~ term ^^ { case op ~ f => (Op(op), f) }
   protected lazy val termR  = (FMUL | FDIV | MUL | DIV) ~ fact ^^ { case op ~ f => (Op(op), f) }
 
+  protected lazy val EOL = "\n" | "\r\n" | "\r" | SCOLON
+
   lazy val term: PackratParser[Expr] =
     fact ~ termR.* ^^ { case l ~ r => makeBinExpr(l, r) }
 
   var expr: PackratParser[Expr] =
     fun | ifexp | let | app | term ~ exprR.* ^^ { case l ~ r => makeBinExpr(l, r) }
 
-  protected lazy val args = id.* // FIX?
+  protected lazy val args = id.*
 
-  def stmnt: PackratParser[Prog] = (expr).* ^^ { case e => Prog(e) }
+  def prog: PackratParser[Prog] = (expr <~ EOL).* ^^ { case e => Prog(e) }
 
   protected def let: PackratParser[Let] = (LET ~> id) ~ (EQ ~> expr) ~ (IN ~> expr) ^^ {
     case id ~ value ~ body => Let(id, value, body)
@@ -47,5 +43,13 @@ class BasicParser extends BaseParser {
 
   protected def makeBinExpr(le: Expr , re: List[(Op, Expr)]) = {
     re.foldLeft(le) { case (a, (op, e)) => Prim(op, a, e) }
+  }
+
+  def parse(in: String): Either[String, Prog] = {
+    parseAll(prog, in) match {
+      case Success(d, next) => Right(d)
+      case NoSuccess(errorMsg, next) =>
+        Left(s"$errorMsg : in ${next.pos.line} at column ${next.pos.column}")
+    }
   }
 }
