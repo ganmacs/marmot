@@ -85,6 +85,42 @@ class ParserTest extends FunSpec {
         case Left(x) => throw new Exception(x)
       }
     }
+
+    describe("prefix Parser") {
+      val parser = new Parser
+      val lines  = readfile("src/test/resouces/prefix_define")
+
+      parser.parse(lines(0), 2) match {
+        case Right(Prog(x)) => { assert( x(0) == Empty()) }
+        case Left(x) => throw new Exception(x)
+      }
+      parser.parse(lines(1), 2) match {
+        case Right(Prog(x)) => {
+          assert(x(0) == Prim(Op("+"), IntLit(1), Prim(Op("+"),IntLit(2), IntLit(1))))
+        }
+        case Left(x) => throw new Exception(x)
+      }
+    }
+
+    // describe("select Parser") {
+    //   val parser = new Parser
+    //   val lines  = readfile("src/test/resouces/select")
+
+    //   parser.parse(lines(0), 2) match {
+    //     case Right(Prog(x)) => { assert( x(0) == Empty()) }
+    //     case Left(x) => throw new Exception(x)
+    //   }
+    //   parser.parse(lines(1), 2) match {
+    //     case Right(Prog(x)) => { assert( x(0) == Empty()) }
+    //     case Left(x) => throw new Exception(x)
+    //   }
+    //   parser.parse(lines(2), 2) match {
+    //     case Right(Prog(x)) => {
+    //       assert(x(0) == IfExp(BoolLit(true), IntLit(8), IntLit(9)))
+    //     }
+    //     case Left(x) => throw new Exception(x)
+    //   }
+    // }
   }
 
   describe("Macro definition") {
