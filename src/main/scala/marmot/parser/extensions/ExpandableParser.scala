@@ -5,13 +5,10 @@ import marmot._
 // TODO change expandable trait
 class ExpandableParser extends BasicParser {
   var xParsers: PMap = new PMap
-  var _namespace: String = "EMPTY"
-  private def p: ExpandableParser = {
-    if ("EMPTY" == _namespace) {
-      this
-    } else {
-      xParsers.getOrCreateBy(_namespace)
-    }
+  var _namespace: Option[String] = None
+  private def p: ExpandableParser = _namespace match {
+    case None => this
+    case Some(v) => xParsers.getOrCreateBy(v)
   }
 
   private def convertToParsers(exprs: List[Expr], env: Env[Expr]): List[Parser[Expr]] =
@@ -47,6 +44,10 @@ class ExpandableParser extends BasicParser {
       Fun(nargs, nbody)
     }
     case e => e
+  }
+
+  def doInNS(ns: String, f: => Unit) = {
+    _namespace = Some(ns); f; _namespace = None
   }
 
   private def buildParser(exprs: List[Expr], semantics: Expr): (PackratParser[Expr], Env[Expr]) = {

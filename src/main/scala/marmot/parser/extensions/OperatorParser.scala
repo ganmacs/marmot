@@ -29,9 +29,7 @@ class OperatorParser extends ExpandableParser with OperatorToken {
   private def define: PackratParser[Expr] =
     (DEFINE ~> namespace) ~ (LPAREN ~> defexpr <~ RPAREN)  ~ (LBR ~> expr <~ RBR) ^^ {
       case Namespace(v) ~ syntax ~ body =>
-        this._namespace = v
-        expandWith(syntax.v, body)
-        this._namespace = "EMPTY"
+        doInNS(v, { expandWith(syntax.v, body) })
         Empty()
     }
 
