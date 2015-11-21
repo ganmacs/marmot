@@ -9,7 +9,6 @@ import marmot._
 class OperatorParser extends ExpandableParser with OperatorToken {
   private val _tmp = expr
   expr = opVar | _tmp
-  xParser = Some(new ExpandableParser)
 
   private lazy val defexpr: PackratParser[Prog] = (expr).* ^^ { case e => Prog(e) }
   private lazy val stmnt: PackratParser[Expr] = defop | define
@@ -17,14 +16,21 @@ class OperatorParser extends ExpandableParser with OperatorToken {
   override def prog: PackratParser[Prog] =
     (stmnt | (expr <~ EOL)).* ^^ { case e => Prog(e) }
 
+  private def namespace: PackratParser[Expr] = (LB ~> NAMESPACE <~ RB) ^^ { v => Namespace(v) }
+
   private def defop: PackratParser[Expr] =
-    (DEFOP ~> LPAREN ~> defexpr <~ RPAREN) ~ (LBR ~> expr <~ RBR) ^^ {
-      case syntax ~ body => xParser.get.expandWith(syntax.v, body); Empty()
+    (DEFOP ~> namespace) ~ (LPAREN ~> defexpr <~ RPAREN)  ~ (LBR ~> expr <~ RBR) ^^ {
+      case Namespace(v) ~ syntax ~ body => xParsers.get(v) match {
+        case None => Empty()
+        case Some(k) => k.expandWith(syntax.v, body); Empty()
+      }
     }
 
   private def define: PackratParser[Expr] =
-    (DEFINE ~> LPAREN ~> defexpr <~ RPAREN) ~ (LBR ~> expr <~ RBR) ^^ {
-      case syntax ~ body => expandWith(syntax.v, body); Empty()
+    (DEFINE ~> namespace) ~ (LPAREN ~> defexpr <~ RPAREN)  ~ (LBR ~> expr <~ RBR) ^^ {
+      case Namespace(v) ~ syntax ~ body =>
+        doInNS(v, { expandWith(syntax.v, body) })
+        Empty()
     }
 
   private lazy val opVar: PackratParser[Expr] = COMMA ~> id ^^ { case t => OperatorVar(t) }
