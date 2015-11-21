@@ -19,7 +19,7 @@ class ExpandableParser extends BasicParser {
       case BoolLit(_) => p.bool.asInstanceOf[Parser[Expr]]
       case Prim(x, e1, e2) => p.bool.asInstanceOf[Parser[Expr]]
       case OperatorVar(VarLit(x))=> p.expr.asInstanceOf[Parser[Expr]] ^^ { case e => env.put(x, e); Empty() }
-      case _ => "" ^^ { case _ => Empty() }
+      case _ => "" ^^^ Empty()
     }
 
   private def expandMacro(expr: Expr, env: Env[Expr]): Expr = expr match {
