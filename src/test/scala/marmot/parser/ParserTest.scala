@@ -2,7 +2,6 @@ package marmot.parser
 
 import org.scalatest.FunSpec
 import marmot._
-import marmot.parser._
 import scala.io.Source
 
 class ParserTest extends FunSpec {
