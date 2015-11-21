@@ -66,10 +66,16 @@ class ParserTest extends FunSpec {
 
     describe("select Parser") {
       parseWithOprator("src/test/resouces/select") match {
+
+    describe("multiple_parser") {
+      val ret =  parseWithOprator("src/test/resouces/multi_parser") match {
         case Right(Prog(x)) => {
+          println(x)
           assert(x(0) == Empty())
           assert(x(1) == Empty())
-          assert(x(2) == IfExp(BoolLit(true), IntLit(10), Prim(Op("+"), IntLit(9), IntLit(10))))
+          assert(x(2) == Empty())
+          assert(x(3) == Empty())
+          assert(x(4) == Prim(Op("+"), Prim(Op("-"), IntLit(1), IntLit(2)), Prim(Op("+"), IntLit(1), IntLit(2))))
         }
         case Left(x) => throw new Exception(x)
       }

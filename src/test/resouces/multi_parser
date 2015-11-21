@@ -1,0 +1,15 @@
+defi[A](identify ,body) {
+  body
+}
+defop[A](add ,e1 ,e2) {
+  e1 - e2
+}
+
+defi[B](plus ,body) {
+  body
+}
+defop[B](add ,e1 ,e2) {
+  e1 + e2
+}
+
+(identify (add 1 2)) + (plus (add 1 2));

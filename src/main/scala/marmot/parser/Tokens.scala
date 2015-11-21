@@ -4,6 +4,7 @@ trait Tokens {
   val INT = """(0|[1-9][0-9]*)""".r
   val DOUBLE =  """(0|[1-9][0-9]*)\.[0-9]+""".r
   val ID = """[a-z][a-zA-Z0-9]*""".r
+  val NAMESPACE = """[A-Z]+""".r
 
   val COMMA = ","
   val COLON = ":"

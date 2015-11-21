@@ -4,8 +4,9 @@ import marmot._
 
 // TODO change expandable trait
 class ExpandableParser extends BasicParser {
-  var xParser: Option[ExpandableParser] = None
-  private lazy val p: ExpandableParser = xParser.getOrElse(this)
+  var xParsers: PMap = new PMap
+  var _namespace: String = "EMPTY"
+  private def p: ExpandableParser = xParsers.getOrElseIn(_namespace, this)
 
   private def convertToParsers(exprs: List[Expr], env: Env[Expr]): List[Parser[Expr]] =
     exprs.map {
@@ -58,5 +59,32 @@ class ExpandableParser extends BasicParser {
         expr = _parser ^^ { case _ => expandMacro(semantics, _env) } | _tmp
       }
     }
+  }
+}
+
+case class PMap (var m: Map[String, ExpandableParser] = Map.empty[String, ExpandableParser]) {
+  def apply(key: String) = m.apply(key)
+  def put(k: String, v: ExpandableParser) = { m = Map(k -> v) ++ m; this }
+  def get(k: String): Option[ExpandableParser] = m.get(k)
+  def getOrCreateBy(k: String): ExpandableParser = get(k) match {
+    case None => {
+      val p = new ExpandableParser
+      put(k, p)
+      p
+    }
+    case Some(m) => m
+  }
+
+  def getOrElseIn(k: String, t: ExpandableParser): ExpandableParser = get(k) match {
+    case None => t
+    case Some(m) => m
+  }
+
+  override def toString = {
+    var s = "( "
+    for ((k,v) <- m) {
+      s += s"$k => $v, "
+    }
+    s+")"
   }
 }
