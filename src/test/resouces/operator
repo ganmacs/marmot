@@ -1,4 +1,4 @@
-defi(unless ,cond then ,e1 else ,e2) {
+defi[A](unless ,cond then ,e1 else ,e2) {
   if cond then e1 else e2
 }
 unless true then 8 else 9;

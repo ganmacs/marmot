@@ -6,7 +6,13 @@ import marmot._
 class ExpandableParser extends BasicParser {
   var xParsers: PMap = new PMap
   var _namespace: String = "EMPTY"
-  private def p: ExpandableParser = xParsers.getOrElseIn(_namespace, this)
+  private def p: ExpandableParser = {
+    if ("EMPTY" == _namespace) {
+      this
+    } else {
+      xParsers.getOrCreateBy(_namespace)
+    }
+  }
 
   private def convertToParsers(exprs: List[Expr], env: Env[Expr]): List[Parser[Expr]] =
     exprs.map {
