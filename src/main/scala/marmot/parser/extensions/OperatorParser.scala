@@ -13,19 +13,21 @@ class OperatorParser extends ExpandableParser with OperatorToken {
 
   override def prog: Pp = (stmnt | (expr <~ EOL)).* ^^ { case e => Prog(e) }
 
-  private def context: Pe = (LB ~> CONTEXT <~ RB) ^^ { v => Namespace(v) }
+  private def ncontext: Pe = (LB ~> CONTEXT <~ RB) ^^ { v => Context(v) }
+  private def context: Pe = (COLON ~> CONTEXT) ^^ { v => Context(v) }
 
-  private def defop: Pe =
-    (DEFOP ~> context) ~ (LPAREN ~> defexpr <~ RPAREN)  ~ (LBR ~> expr <~ RBR) ^^ {
-      case Namespace(v) ~ syntax ~ body => parserMap.get(v) match {
+  private lazy val body: Pe = LBR ~> expr <~ RBR
+  private lazy val defArgs: Pp = LPAREN ~> defexpr <~ RPAREN
+
+  private def defop: Pe = (DEFOP ~> ncontext) ~ defArgs ~ body ^^ {
+      case Context(v) ~ syntax ~ body => parserMap.get(v) match {
         case None => Empty()
         case Some(p) => p.expandSyntax(syntax.v, body); Empty()
       }
     }
 
-  private def defi: Pe =
-    (DEFINE ~> context) ~ (LPAREN ~> defexpr <~ RPAREN)  ~ (LBR ~> expr <~ RBR) ^^ {
-      case Namespace(v) ~ syntax ~ body =>
+  private def defi: Pe = DEFINE ~> defArgs ~ context ~ body ^^ {
+      case syntax ~ Context(v) ~ body =>
         doInNS(v, { expandSyntax(syntax.v, body) })
         Empty()
     }

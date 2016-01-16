@@ -78,10 +78,7 @@ class ExpandableParser extends BasicParser {
   private def buildParser(exprs: List[Expr]): (PackratParser[Expr], MMap[String, Expr]) = {
     convertExprsToParsers(exprs) match {
       case (parsers, m) => {
-        val parser = parsers.tail.foldLeft(parsers.head) {
-          (a, b) => a ~ b ^^^ Empty()
-        }
-
+        val parser = parsers.tail.foldLeft(parsers.head) { (a, b) => a ~ b ^^^ Empty() }
         (parser, m)
       }
     }
