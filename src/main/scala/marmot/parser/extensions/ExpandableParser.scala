@@ -3,7 +3,6 @@ package marmot.parser.extensions
 import marmot._
 import scala.collection.mutable.{Map => MMap}
 
-// TODO change expandable trait
 class ExpandableParser extends BasicParser {
   var xParsers: MMap[String, ExpandableParser] = MMap.empty[String, ExpandableParser]
   var _namespace: Option[String] = None
