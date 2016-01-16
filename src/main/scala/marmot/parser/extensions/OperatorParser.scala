@@ -19,8 +19,8 @@ class OperatorParser extends ExpandableParser with OperatorToken {
   private lazy val body: Pe = LBR ~> expr <~ RBR
   private lazy val defArgs: Pp = LPAREN ~> defexpr <~ RPAREN
 
-  private def defop: Pe = (DEFOP ~> ncontext) ~ defArgs ~ body ^^ {
-      case Context(v) ~ syntax ~ body => parserMap.get(v) match {
+  private def defop: Pe = DEFOP ~> defArgs ~ context ~ body ^^ {
+      case  syntax ~ Context(v) ~ body => parserMap.get(v) match {
         case None => Empty()
         case Some(p) => p.expandSyntax(syntax.v, body); Empty()
       }
