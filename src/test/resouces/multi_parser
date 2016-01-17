@@ -1,4 +1,4 @@
-defi(identify body:A ): A {
+defi(identify body:A) {
   body
 }
 
@@ -6,7 +6,7 @@ defop(add e1:A e2:A): A {
   e1 - e2
 }
 
-defi(plus body:B): B {
+defi(plus body:B) {
   body
 }
 

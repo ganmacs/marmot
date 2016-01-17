@@ -27,8 +27,8 @@ class OperatorParser extends ExpandableParser with OperatorToken {
     }
   }
 
-  private def defi: Pe = DEFINE ~> defArgs ~ context ~ body ^^ {
-    case syntax ~ Context(v) ~ body => expandSyntax(syntax.v, body); Empty()
+  private def defi: Pe = DEFINE ~> defArgs ~ body ^^ {
+    case syntax ~ body => expandSyntax(syntax.v, body); Empty()
   }
 }
 
