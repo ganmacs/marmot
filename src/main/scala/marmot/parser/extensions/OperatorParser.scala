@@ -2,7 +2,6 @@ package marmot.parser.extensions
 
 import marmot._
 
-
 class OperatorParser extends ExpandableParser with OperatorToken {
   private lazy val str = """[^)\s]+""".r ^^ { case t => VarLit(t) }
 
@@ -20,17 +19,18 @@ class OperatorParser extends ExpandableParser with OperatorToken {
   private lazy val defArgs: Pp = LPAREN ~> defexpr <~ RPAREN
 
   private def defop: Pe = DEFOP ~> defArgs ~ context ~ body ^^ {
-      case  syntax ~ Context(v) ~ body => parserMap.get(v) match {
-        case None => Empty()
-        case Some(p) => p.expandSyntax(syntax.v, body); Empty()
-      }
+    case  syntax ~ Context(v) ~ body => parserMap.get(v) match {
+      case None => Empty()
+      case Some(p) => p.expandSyntax(syntax.v, body); Empty()
     }
+  }
 
   private def defi: Pe = DEFINE ~> defArgs ~ context ~ body ^^ {
-      case syntax ~ Context(v) ~ body =>
-        doInNS(v, { expandSyntax(syntax.v, body) })
-        Empty()
-    }
+    case syntax ~ Context(v) ~ body =>
+      println(syntax.v)
+      doInNS(v, { expandSyntax(syntax.v, body) })
+      Empty()
+  }
 
   private lazy val opVar: Pe = COMMA ~> id ^^ { case t => OperatorVar(t) }
   // private lazy val dargs: PackratParser[Prog] = (expr).* ^^ { case e => Prog(e) }

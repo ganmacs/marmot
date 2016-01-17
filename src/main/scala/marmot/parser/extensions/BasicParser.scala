@@ -7,9 +7,9 @@ class BasicParser extends BaseParser {
   type Pp = PackratParser[Prog]
 
   protected lazy val int: Pe = INT ^^ { case e => IntLit(e.toInt) }
-  protected val double: Pe = DOUBLE ^^ { case e => DoubleLit(e.toDouble) }
-  protected val id: PackratParser[VarLit] = ID ^^ { case e => VarLit(e) }
-  protected val bool: Pe = TRUE ^^ { case _ => BoolLit(true) } | FALSE ^^ { case _ => BoolLit(false) }
+  protected lazy val double: Pe = DOUBLE ^^ { case e => DoubleLit(e.toDouble) }
+  protected lazy val id: PackratParser[VarLit] = ID ^^ { case e => VarLit(e) }
+  protected lazy val bool: Pe = TRUE ^^ { case _ => BoolLit(true) } | FALSE ^^ { case _ => BoolLit(false) }
 
   protected lazy val EOL = "\n" | "\r\n" | "\r" | SCOLON
   protected lazy val args = id.*
