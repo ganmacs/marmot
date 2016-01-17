@@ -54,7 +54,9 @@ object Evaluator {
       case BoolValue(false) => eval(e2, env)
     }
     case Let(VarLit(n), value, body) => {
-      val newEnv = Env.build(env, (n, eval(value, env)))
+      val r = eval(value, env)
+      env.put(n, r)
+      val newEnv = Env.build(env, (n, r))
       eval(body, newEnv)
     }
     case Fun(ags, body) => FunValue(ags, body, env)

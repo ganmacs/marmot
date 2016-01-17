@@ -3,7 +3,7 @@ package marmot
 object Env {
   def empty[T] = new Env[T]
   def build[T](parent: Env[T], t: Tuple2[String, T]) =
-    new Env[T](Some(parent), Map(t._1 ->  t._2))
+    new Env[T](Some(parent), Map(t._1 -> t._2))
 }
 
 case class Env[T](
