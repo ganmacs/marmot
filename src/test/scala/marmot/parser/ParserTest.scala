@@ -49,10 +49,19 @@ class ParserTest extends FunSpec {
       assert(parseLine("if true then 2 else 1") == IfExp(BoolLit(true), IntLit(2), IntLit(1)))
       assert(parseLine("if 1 < 2 then 2 else 1") == IfExp(Prim(Op("<"), IntLit(1), IntLit(2)), IntLit(2), IntLit(1)))
       assert(parseLine("if (1 < 2) then 2 else 1") == IfExp(Prim(Op("<"), IntLit(1), IntLit(2)), IntLit(2), IntLit(1)))
+      assert(parseLine("if true then 2 + 2 else 1 + 1") == IfExp(BoolLit(true),
+        Prim(Op("+"), IntLit(2),IntLit(2)),
+        Prim(Op("+"), IntLit(1),IntLit(1))))
     }
 
     describe("let return Prim obj") {
       assert(parseLine("let x = 1 in x") == Let(VarLit("x"), IntLit(1), VarLit("x")))
+      assert(parseLine("let x = if true then 2 + 2 else 1 + a(0) in x") ==
+        Let(VarLit("x"),
+          IfExp(BoolLit(true),
+            Prim(Op("+"), IntLit(2),IntLit(2)),
+            Prim(Op("+"), IntLit(1), App(VarLit("a"), List(IntLit(0))))),
+          VarLit("x")))
     }
 
     describe("fun return Fun obj") {
@@ -64,6 +73,10 @@ class ParserTest extends FunSpec {
     describe("app return App obj") {
       assert(parseLine("f (1 2)") ==
         App(VarLit("f"), List(IntLit(1), IntLit(2))))
+      assert(parseLine("f(1 2) + 1") ==
+        Prim(Op("+"),
+          App(VarLit("f"), List(IntLit(1), IntLit(2))),
+          IntLit(1)))
     }
   }
 
@@ -88,7 +101,7 @@ class ParserTest extends FunSpec {
 
     describe("add") {
       parseWithOprator("src/test/resouces/add") match {
-        case Right(Prog(x)) => assert(x(1) == IntLit(1000))
+        case Right(Prog(x)) => assert(x(1) == Prim(Op("+"), IntLit(2), IntLit(1000)))
         case Left(x) => throw new Exception(x)
       }
     }
@@ -142,6 +155,15 @@ class ParserTest extends FunSpec {
         case Left(x) => throw new Exception(x)
       }
     }
+
+    // describe("fold") {
+    //   parseWithOprator("src/test/resouces/fold") match {
+    //     case Right(Prog(x)) => {
+    //       assert(x(1) == IfExp(BoolLit(true), IntLit(8), IntLit(9)))
+    //     }
+    //     case Left(x) => throw new Exception(x)
+    //   }
+    // }
 
     describe("expr_error line") {
       val ret =  parseWithOprator("src/test/resouces/expr_error") match {

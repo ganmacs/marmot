@@ -26,6 +26,7 @@ class EvaluatorTest extends FunSpec {
       assert(evalLine("if true then 1 else 2") == IntValue(1))
       assert(evalLine("if false then 1 else 2") == IntValue(2))
       assert(evalLine("if (1 < 0) then 1 else 2") == IntValue(2))
+      assert(evalLine("if (1 < 0) then 1 else 2") == IntValue(2))
     }
 
     describe("Array") {
@@ -43,6 +44,7 @@ class EvaluatorTest extends FunSpec {
     }
 
     describe("fun") {
+      // assert(evalLine("let a = fun x -> if x == 0 then 1 else (3 * a(x - 1)) in a(3)") == IntValue(3))
       assert(evalLine("let a = fun x y -> x + y in a (1 2)") == IntValue(3))
       assert(evalLine("let a = fun x y -> x + y in (a (1 2)) + 1") == IntValue(4))
       assert(evalLine("let x = 1 in let f = fun y -> x + y in f (10)") == IntValue(11))

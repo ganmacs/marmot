@@ -42,7 +42,7 @@ class BasicParser extends BaseParser {
 
   lazy val term: Pe = fact ~ termR.* ^^ { case l ~ r => makeBinExpr(l, r) }
 
-  def fact: Pe = bool | double | int | id | LPAREN ~> expr <~ RPAREN
+  def fact: Pe = fun | ifexp | let | app | aryapp | ary | bool | double | int | id | LPAREN ~> expr <~ RPAREN
 
   protected def makeBinExpr(le: Expr , re: List[(Op, Expr)]) = {
     re.foldLeft(le) { case (a, (op, e)) => Prim(op, a, e) }
@@ -50,7 +50,7 @@ class BasicParser extends BaseParser {
 
   def prog: Pp = (expr <~ EOL).* ^^ { case e => Prog(e) }
 
-  var expr: Pe = fun | ifexp | let | app | aryapp | ary | comp | term ~ exprR.* ^^ {
+  var expr: Pe = comp | term ~ exprR.* ^^ {
     case l ~ r => makeBinExpr(l, r)
   }
 
