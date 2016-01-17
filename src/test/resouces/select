@@ -5,5 +5,4 @@ defi(select e1:A or e2:A where cond:A): A {
 defop(add e1:A e2:A): A {
   e1 + e2
 }
-
 select 10 or (add 9 10) where true;

@@ -97,6 +97,19 @@ class ParserTest extends FunSpec {
       }
     }
 
+    describe("multi context") {
+      val ret =  parseWithOprator("src/test/resouces/context") match {
+        case Right(Prog(x)) => {
+          assert(x(3) == Prim(
+            Op("+"),
+            Prim(Op("-"), IntLit(10), IntLit(100)),
+            Prim(Op("*"), IntLit(1), IntLit(10))
+          ))
+        }
+        case Left(x) => throw new Exception(x)
+      }
+    }
+
     describe("expr_error line") {
       val ret =  parseWithOprator("src/test/resouces/expr_error") match {
         case Right(Prog(x)) => "success"
