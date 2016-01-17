@@ -17,24 +17,6 @@ class ExpandableParser extends BasicParser {
     }
   }
 
-  def doInNS(ns: String, f: => Unit) = {
-    context = Some(ns); f; context = None
-  }
-
-  private def p: ExpandableParser = context match {
-    case None => this
-    case Some(v) => {
-      parserMap.get(v) match {
-        case Some(m) => m
-        case None => {
-          val p = new ExpandableParser
-          parserMap.put(v, p)
-          p
-        }
-      }
-    }
-  }
-
   private def expandMacro(expr: Expr, m: MMap[String, Expr]): Expr = expr match {
     case v@VarLit(x) => m.get(x) match {
       case Some(ex) => ex
@@ -59,17 +41,27 @@ class ExpandableParser extends BasicParser {
     case e => e
   }
 
+  private def p(c :Context): ExpandableParser = {
+    val Context(v) = c
+    parserMap.get(v) match {
+      case Some(m) => m
+      case None => {
+        val p = new ExpandableParser
+        parserMap.put(v, p)
+        p
+      }
+    }
+  }
+
   // Convert Exprs to micro parsers
   private def convertExprsToParsers(exprs: List[Expr]): (List[Parser[Expr]], MMap[String, Expr]) = {
     val m = MMap.empty[String, Expr]
     val r = exprs.map {
       case VarLit(x) => x ^^ { case e => Empty() }
-      case IntLit(_) => p.int.asInstanceOf[Parser[Expr]]
-      case DoubleLit(_) => p.double.asInstanceOf[Parser[Expr]]
-      case BoolLit(_) => p.bool.asInstanceOf[Parser[Expr]]
-      case Prim(x, e1, e2) => p.bool.asInstanceOf[Parser[Expr]]
-      case OperatorVar(VarLit(x)) => p.expr.asInstanceOf[Parser[Expr]] ^^ { case v => m.put(x, v); Empty() }
-      case _ => "" ^^^ Empty()
+      case VarWithContext(VarLit(x), c) => p(c).expr.asInstanceOf[Parser[Expr]] ^^ {
+        case v => m.put(x, v); Empty()
+      }
+      case x => throw new Exception("Unknow Token: " + x)
     }
     (r, m)
   }

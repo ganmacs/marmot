@@ -1,4 +1,4 @@
-defi(1 + ,body): A {
+defi(1 + body:A): A {
   1000
 }
 1 + 100;

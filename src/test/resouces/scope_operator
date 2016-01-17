@@ -1,4 +1,4 @@
-defop(add ,e1 ,e2): B {
+defop(add e1:A e2:A): B {
   e1 + e2
 }
 add 9 10
