@@ -17,4 +17,5 @@ case class IfExp(cond: Expr, e1: Expr, e2: Expr) extends Expr
 case class Let(id: VarLit, value: Expr, body: Expr) extends Expr
 case class Prog(v: List[Expr]) extends Expr
 case class OperatorVar(varname: VarLit) extends Expr
-case class Namespace(v: String) extends Expr
+case class Context(v: String) extends Expr
+case class VarWithContext(varname: VarLit, context: Context) extends Expr

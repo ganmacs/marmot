@@ -2,38 +2,39 @@ package marmot.parser.extensions
 
 import marmot._
 
-/*
- * This class defines new operators and expands inner basic paser by them.
- * If this paser fail to parse, it will change this parser to basic paser which is expanded.
- */
+
 class OperatorParser extends ExpandableParser with OperatorToken {
   private val _tmp = expr
   expr = opVar | _tmp
 
-  private lazy val defexpr: PackratParser[Prog] = (expr).* ^^ { case e => Prog(e) }
-  private lazy val stmnt: PackratParser[Expr] = defop | define
+  private lazy val stmnt: Pe = defi | defop
 
-  override def prog: PackratParser[Prog] =
-    (stmnt | (expr <~ EOL)).* ^^ { case e => Prog(e) }
+  private lazy val defexpr: Pp = (expr).* ^^ { case e => Prog(e) }
+  private lazy val varWithContext: PackratParser[VarWithContext] =
+    id ~ context ^^ { case t ~ c => VarWithContext(t, c) }
 
-  private def namespace: PackratParser[Expr] = (LB ~> NAMESPACE <~ RB) ^^ { v => Namespace(v) }
+  override def prog: Pp = (stmnt | (expr <~ EOL)).* ^^ { case e => Prog(e) }
 
-  private def defop: PackratParser[Expr] =
-    (DEFOP ~> namespace) ~ (LPAREN ~> defexpr <~ RPAREN)  ~ (LBR ~> expr <~ RBR) ^^ {
-      case Namespace(v) ~ syntax ~ body => xParsers.get(v) match {
+  private def context: PackratParser[Context] = (COLON ~> CONTEXT) ^^ { v => Context(v) }
+
+  private lazy val body: Pe = LBR ~> expr <~ RBR
+  private lazy val defArgs: Pp = LPAREN ~> defexpr <~ RPAREN
+
+  private def defop: Pe = DEFOP ~> defArgs ~ context ~ body ^^ {
+      case  syntax ~ Context(v) ~ body => parserMap.get(v) match {
         case None => Empty()
-        case Some(k) => k.expandWith(syntax.v, body); Empty()
+        case Some(p) => p.expandSyntax(syntax.v, body); Empty()
       }
     }
 
-  private def define: PackratParser[Expr] =
-    (DEFINE ~> namespace) ~ (LPAREN ~> defexpr <~ RPAREN)  ~ (LBR ~> expr <~ RBR) ^^ {
-      case Namespace(v) ~ syntax ~ body =>
-        doInNS(v, { expandWith(syntax.v, body) })
+  private def defi: Pe = DEFINE ~> defArgs ~ context ~ body ^^ {
+      case syntax ~ Context(v) ~ body =>
+        doInNS(v, { expandSyntax(syntax.v, body) })
         Empty()
     }
 
-  private lazy val opVar: PackratParser[Expr] = COMMA ~> id ^^ { case t => OperatorVar(t) }
+  private lazy val opVar: Pe = COMMA ~> id ^^ { case t => OperatorVar(t) }
+  // private lazy val dargs: PackratParser[Prog] = (expr).* ^^ { case e => Prog(e) }
 }
 
 trait OperatorToken {

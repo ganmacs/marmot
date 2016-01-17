@@ -1,14 +1,14 @@
-defi[A](identify ,body) {
+defi(identify ,body): A {
   body
 }
-defop[A](add ,e1 ,e2) {
+defop(add ,e1 ,e2): A {
   e1 - e2
 }
 
-defi[B](plus ,body) {
+defi(plus ,body): B {
   body
 }
-defop[B](add ,e1 ,e2) {
+defop(add ,e1 ,e2): B {
   e1 + e2
 }
 (identify (add 1 2)) + (plus (add 1 2));

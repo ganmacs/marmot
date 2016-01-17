@@ -3,25 +3,19 @@ package marmot.parser.extensions
 import marmot._
 
 class BasicParser extends BaseParser {
-  lazy val int: PackratParser[Expr] = INT ^^ { case e => IntLit(e.toInt) }
-  lazy val double: PackratParser[Expr] = DOUBLE ^^ { case e => DoubleLit(e.toDouble) }
-  lazy val id: PackratParser[VarLit] = ID ^^ { case e => VarLit(e) }
-  lazy val bool: PackratParser[Expr] = TRUE ^^ { case _ => BoolLit(true) } | FALSE ^^ { case _ => BoolLit(false) }
+  type Pe = PackratParser[Expr]
+  type Pp = PackratParser[Prog]
+
+  protected lazy val int: Pe = INT ^^ { case e => IntLit(e.toInt) }
+  protected val double: Pe = DOUBLE ^^ { case e => DoubleLit(e.toDouble) }
+  protected val id: PackratParser[VarLit] = ID ^^ { case e => VarLit(e) }
+  protected val bool: Pe = TRUE ^^ { case _ => BoolLit(true) } | FALSE ^^ { case _ => BoolLit(false) }
+
+  protected lazy val EOL = "\n" | "\r\n" | "\r" | SCOLON
+  protected lazy val args = id.*
 
   protected lazy val exprR  = (FADD | FSUB | ADD | SUB) ~ term ^^ { case op ~ f => (Op(op), f) }
   protected lazy val termR  = (FMUL | FDIV | MUL | DIV) ~ fact ^^ { case op ~ f => (Op(op), f) }
-
-  protected lazy val EOL = "\n" | "\r\n" | "\r" | SCOLON
-
-  lazy val term: PackratParser[Expr] =
-    fact ~ termR.* ^^ { case l ~ r => makeBinExpr(l, r) }
-
-  var expr: PackratParser[Expr] =
-    fun | ifexp | let | app | term ~ exprR.* ^^ { case l ~ r => makeBinExpr(l, r) }
-
-  protected lazy val args = id.*
-
-  def prog: PackratParser[Prog] = (expr <~ EOL).* ^^ { case e => Prog(e) }
 
   protected def let: PackratParser[Let] = (LET ~> id) ~ (EQ ~> expr) ~ (IN ~> expr) ^^ {
     case id ~ value ~ body => Let(id, value, body)
@@ -31,18 +25,26 @@ class BasicParser extends BaseParser {
     case c ~ e1 ~ e2 => IfExp(c, e1, e2)
   }
 
-  protected def app: PackratParser[Expr] = id ~ (LPAREN ~> expr.* <~ RPAREN) ^^ {
+  protected def app: Pe = id ~ (LPAREN ~> expr.* <~ RPAREN) ^^ {
     case n ~ exprs => App(n, exprs)
   }
 
-  protected def fun: PackratParser[Expr] = (FUN ~> args) ~ (RARROW ~> expr) ^^ {
+  protected def fun: Pe = (FUN ~> args) ~ (RARROW ~> expr) ^^ {
     case s ~ e => Fun(s, e)
   }
 
-  def fact: PackratParser[Expr] = bool | double | int | id | LPAREN ~> expr <~ RPAREN
+  lazy val term: Pe = fact ~ termR.* ^^ { case l ~ r => makeBinExpr(l, r) }
+
+  def fact: Pe = bool | double | int | id | LPAREN ~> expr <~ RPAREN
 
   protected def makeBinExpr(le: Expr , re: List[(Op, Expr)]) = {
     re.foldLeft(le) { case (a, (op, e)) => Prim(op, a, e) }
+  }
+
+  def prog: Pp = (expr <~ EOL).* ^^ { case e => Prog(e) }
+
+  var expr: Pe = fun | ifexp | let | app | term ~ exprR.* ^^ {
+    case l ~ r => makeBinExpr(l, r)
   }
 
   def parse(in: String): Either[String, Prog] = {

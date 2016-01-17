@@ -1,7 +1,7 @@
-defi[A](select ,e1 or ,e2 where ,cond) {
+defi(select ,e1 or ,e2 where ,cond): A {
   if cond then e1 else e2
 }
-defop[A](add ,e1 ,e2) {
+defop(add ,e1 ,e2): A {
   e1 + e2
 }
 select 10 or (add 9 10) where true;

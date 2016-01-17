@@ -3,40 +3,42 @@ package marmot.parser.extensions
 import marmot._
 import scala.collection.mutable.{Map => MMap}
 
-// TODO change expandable trait
 class ExpandableParser extends BasicParser {
-  var xParsers: MMap[String, ExpandableParser] = MMap.empty[String, ExpandableParser]
-  var _namespace: Option[String] = None
+  protected var parserMap: MMap[String, ExpandableParser] = MMap.empty[String, ExpandableParser]
+  private var context: Option[String] = None
 
-  private def p: ExpandableParser = _namespace match {
+  // Assosiate builed parser with semantics
+  def expandSyntax(exprs: List[Expr], semantics: Expr): Unit = {
+    buildParser(exprs) match {
+      case (parser, map) => {
+        val tmp = expr
+        expr = parser ^^ { case _ => expandMacro(semantics, map) } | tmp
+      }
+    }
+  }
+
+  def doInNS(ns: String, f: => Unit) = {
+    context = Some(ns); f; context = None
+  }
+
+  private def p: ExpandableParser = context match {
     case None => this
     case Some(v) => {
-      xParsers.get(v) match {
+      parserMap.get(v) match {
         case Some(m) => m
         case None => {
           val p = new ExpandableParser
-          xParsers.put(v, p)
+          parserMap.put(v, p)
           p
         }
       }
     }
   }
 
-  private def convertToParsers(exprs: List[Expr], m: MMap[String, Expr]): List[Parser[Expr]] =
-    exprs.map {
-      case VarLit(x) => x ^^ { case e => Empty() }
-      case IntLit(_) => p.int.asInstanceOf[Parser[Expr]]
-      case DoubleLit(_) => p.double.asInstanceOf[Parser[Expr]]
-      case BoolLit(_) => p.bool.asInstanceOf[Parser[Expr]]
-      case Prim(x, e1, e2) => p.bool.asInstanceOf[Parser[Expr]]
-      case OperatorVar(VarLit(x))=> p.expr.asInstanceOf[Parser[Expr]] ^^ { case e => m.put(x, e); Empty() }
-      case _ => "" ^^^ Empty()
-    }
-
   private def expandMacro(expr: Expr, m: MMap[String, Expr]): Expr = expr match {
     case v@VarLit(x) => m.get(x) match {
       case Some(ex) => ex
-      case None => v // not macro, so return default value
+      case None => v // Not macro. Return default value.
     }
     case Prim(x, e1, e2) => {
       val ne1 = expandMacro(e1, m)
@@ -57,24 +59,27 @@ class ExpandableParser extends BasicParser {
     case e => e
   }
 
-  def doInNS(ns: String, f: => Unit) = {
-    _namespace = Some(ns); f; _namespace = None
-  }
-
-  private def buildParser(exprs: List[Expr], semantics: Expr): (PackratParser[Expr], MMap[String, Expr]) = {
-    val operatorMap = MMap.empty[String, Expr]
-    val parsers = convertToParsers(exprs, operatorMap)
-    val _parser = parsers.tail.foldLeft(parsers.head) {
-      (a, b) => a ~ b ^^^ Empty()
+  // Convert Exprs to micro parsers
+  private def convertExprsToParsers(exprs: List[Expr]): (List[Parser[Expr]], MMap[String, Expr]) = {
+    val m = MMap.empty[String, Expr]
+    val r = exprs.map {
+      case VarLit(x) => x ^^ { case e => Empty() }
+      case IntLit(_) => p.int.asInstanceOf[Parser[Expr]]
+      case DoubleLit(_) => p.double.asInstanceOf[Parser[Expr]]
+      case BoolLit(_) => p.bool.asInstanceOf[Parser[Expr]]
+      case Prim(x, e1, e2) => p.bool.asInstanceOf[Parser[Expr]]
+      case OperatorVar(VarLit(x)) => p.expr.asInstanceOf[Parser[Expr]] ^^ { case v => m.put(x, v); Empty() }
+      case _ => "" ^^^ Empty()
     }
-    (_parser, operatorMap)
+    (r, m)
   }
 
-  def expandWith(exprs: List[Expr], semantics: Expr): Unit = {
-    buildParser(exprs, semantics) match {
-      case (_parser, _map) => {
-        val _tmp = expr
-        expr = _parser ^^ { case _ => expandMacro(semantics, _map) } | _tmp
+  // Build micro parsers and then fold them to big parser.
+  private def buildParser(exprs: List[Expr]): (PackratParser[Expr], MMap[String, Expr]) = {
+    convertExprsToParsers(exprs) match {
+      case (parsers, m) => {
+        val parser = parsers.tail.foldLeft(parsers.head) { (a, b) => a ~ b ^^^ Empty() }
+        (parser, m)
       }
     }
   }
