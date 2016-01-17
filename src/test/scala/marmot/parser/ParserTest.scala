@@ -78,6 +78,19 @@ class ParserTest extends FunSpec {
       }
     }
 
+    describe("nested context") {
+      parseWithOprator("src/test/resouces/nested_context") match {
+        case Right(Prog(x)) => {
+          assert(x(2) == Prim(
+            Op("+"),
+            Prim(Op("-"), Prim(Op("-"), IntLit(1), IntLit(1)), IntLit(1)),
+            IntLit(1)
+          ))
+        }
+        case Left(x) => throw new Exception(x)
+      }
+    }
+
     describe("ast_cotnext") {
       parseWithOprator("src/test/resouces/ast_context") match {
         case Right(Prog(x)) => assert(
@@ -124,7 +137,15 @@ class ParserTest extends FunSpec {
     }
 
     describe("scope_operator Parser") {
-      val ret =  parseWithOprator("src/test/resouces/scope_operator") match {
+      val ret = parseWithOprator("src/test/resouces/scope_operator") match {
+        case Right(Prog(x)) => "success"
+        case Left(_) => "false"
+      }
+      assert(ret == "false")
+    }
+
+    describe("invalid_nested Parser") {
+      val ret = parseWithOprator("src/test/resouces/invalid_nested") match {
         case Right(Prog(x)) => "success"
         case Left(_) => "false"
       }

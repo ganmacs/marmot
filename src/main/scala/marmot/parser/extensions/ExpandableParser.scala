@@ -8,12 +8,9 @@ class ExpandableParser extends BasicParser {
 
   // Assosiate builed parser with semantics
   def expandSyntax(exprs: List[Expr], semantics: Expr): Unit = {
-    buildParser(exprs) match {
-      case (parser, map) => {
-        val tmp = expr
-        expr = parser ^^ { case _ => expandMacro(semantics, map) } | tmp
-      }
-    }
+    val (parser, map) = buildParser(exprs)
+    val tmp = expr
+    expr = parser ^^ { case _ => expandMacro(semantics, map) } | tmp
   }
 
   private def expandMacro(expr: Expr, m: MacroMap): Expr = expr match {
@@ -44,8 +41,8 @@ class ExpandableParser extends BasicParser {
       case None => {
         val p = new ExpandableParser
         // initialize every parser has ("*" => OperatorParesr) in paserMap
-        // TODO may be ,passing just parent map is better
         p.parserMap.put("*", parserMap("*"))
+        p.parserMap.put(v, p)
         parserMap.put(v, p)
         p
       }
@@ -67,12 +64,9 @@ class ExpandableParser extends BasicParser {
 
   // Build micro parsers and then fold them to big parser.
   private def buildParser(exprs: List[Expr]): (PackratParser[Expr], MacroMap) = {
-    convertExprsToParsers(exprs) match {
-      case (parsers, m) => {
-        val parser = parsers.tail.foldLeft(parsers.head) { (a, b) => a ~ b ^^^ Empty() }
-        (parser, m)
-      }
-    }
+    val (parsers, m) = convertExprsToParsers(exprs)
+    val parser = parsers.tail.foldLeft(parsers.head) { (a, b) => a ~ b ^^^ Empty() }
+    (parser, m)
   }
 
   // Macro map is a Map. Data structure its value is a stack.
