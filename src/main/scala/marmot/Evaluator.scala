@@ -20,12 +20,18 @@ object Evaluator {
         case Op("-") => IntValue(x - y)
         case Op("*") => IntValue(x * y)
         case Op("/") => IntValue(x / y)
+        case Op("==") => BoolValue(x == y)
+        case Op("<") => BoolValue(x < y)
+        case Op(">") => BoolValue(x > y)
       }
       case (DoubleValue(x), DoubleValue(y)) => op match {
         case Op("+.") => DoubleValue(x + y)
         case Op("-.") => DoubleValue(x - y)
         case Op("*.") => DoubleValue(x * y)
         case Op("/.") => DoubleValue(x / y)
+        case Op("==") => BoolValue(x == y)
+        case Op("<") => BoolValue(x < y)
+        case Op(">") => BoolValue(x > y)
       }
       case (_, _) => throw new Exception("Unmatched type")
     }

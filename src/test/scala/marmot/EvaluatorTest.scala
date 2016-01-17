@@ -16,9 +16,16 @@ class EvaluatorTest extends FunSpec {
       assert(evalLine("1.2 +. 1.3") == DoubleValue(2.5))
     }
 
+    describe("Comp") {
+      assert(evalLine("1 == 1") == BoolValue(true))
+      assert(evalLine("2 < 1") == BoolValue(false))
+      assert(evalLine("2.0 < 1.0") == BoolValue(false))
+    }
+
     describe("if") {
       assert(evalLine("if true then 1 else 2") == IntValue(1))
       assert(evalLine("if false then 1 else 2") == IntValue(2))
+      assert(evalLine("if (1 < 0) then 1 else 2") == IntValue(2))
     }
 
     describe("let") {

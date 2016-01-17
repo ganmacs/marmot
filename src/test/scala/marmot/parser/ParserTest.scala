@@ -32,8 +32,17 @@ class ParserTest extends FunSpec {
       assert(parseLine("1.2 +. 2.0") == Prim(Op("+."), DoubleLit(1.2), DoubleLit(2.0)))
     }
 
+    describe("compare expr")  {
+      assert(parseLine("1 < 2") == Prim(Op("<"), IntLit(1), IntLit(2)))
+      assert(parseLine("1 == 2") == Prim(Op("=="), IntLit(1), IntLit(2)))
+      assert(parseLine("1 + 2 > 2") == Prim(Op(">"), Prim(Op("+"), IntLit(1), IntLit(2)), IntLit(2)))
+      assert(parseLine("(1 + 2) > 2") == Prim(Op(">"), Prim(Op("+"), IntLit(1), IntLit(2)), IntLit(2)))
+    }
+
     describe("if return Prim obj") {
       assert(parseLine("if true then 2 else 1") == IfExp(BoolLit(true), IntLit(2), IntLit(1)))
+      assert(parseLine("if 1 < 2 then 2 else 1") == IfExp(Prim(Op("<"), IntLit(1), IntLit(2)), IntLit(2), IntLit(1)))
+      assert(parseLine("if (1 < 2) then 2 else 1") == IfExp(Prim(Op("<"), IntLit(1), IntLit(2)), IntLit(2), IntLit(1)))
     }
 
     describe("let return Prim obj") {
