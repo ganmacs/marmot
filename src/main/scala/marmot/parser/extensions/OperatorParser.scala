@@ -4,12 +4,11 @@ import marmot._
 
 
 class OperatorParser extends ExpandableParser with OperatorToken {
-  private val _tmp = expr
-  expr = opVar | _tmp
+  private lazy val str = """[^)\s]+""".r ^^ { case t => VarLit(t) }
 
   private lazy val stmnt: Pe = defi | defop
 
-  private lazy val defexpr: Pp = (expr).* ^^ { case e => Prog(e) }
+  private lazy val defexpr: Pp = (opVar | str).* ^^ { case e => Prog(e) }
   private lazy val varWithContext: PackratParser[VarWithContext] =
     id ~ context ^^ { case t ~ c => VarWithContext(t, c) }
 

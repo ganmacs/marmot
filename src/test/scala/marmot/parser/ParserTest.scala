@@ -74,6 +74,16 @@ class ParserTest extends FunSpec {
       }
     }
 
+    describe("add") {
+      parseWithOprator("src/test/resouces/add") match {
+        case Right(Prog(x)) => {
+          assert(x(0) == Empty())
+          assert(x(1) == IntLit(1000))
+        }
+        case Left(x) => throw new Exception(x)
+      }
+    }
+
     describe("multiple_parser") {
       val ret =  parseWithOprator("src/test/resouces/multi_parser") match {
         case Right(Prog(x)) => {
