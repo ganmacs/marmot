@@ -28,6 +28,12 @@ class EvaluatorTest extends FunSpec {
       assert(evalLine("if (1 < 0) then 1 else 2") == IntValue(2))
     }
 
+    describe("Array") {
+      assert(evalLine("[1; 2; 3]") == ArrayValue(List(IntValue(1), IntValue(2), IntValue(3))))
+      assert(evalLine("let a = [1; 2; 3] in a[0]") == IntValue(1))
+      assert(evalLine("let a = [1; 2; 3] in a[1]") == IntValue(2))
+    }
+
     describe("let") {
       assert(evalLine("let x = 1 in x") == IntValue(1))
 

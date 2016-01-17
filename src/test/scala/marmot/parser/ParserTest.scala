@@ -32,6 +32,12 @@ class ParserTest extends FunSpec {
       assert(parseLine("1.2 +. 2.0") == Prim(Op("+."), DoubleLit(1.2), DoubleLit(2.0)))
     }
 
+    describe("array") {
+      assert(parseLine("[0; 1; 2; 3]") == ArrayLit(List(IntLit(0), IntLit(1), IntLit(2), IntLit(3))))
+      assert(parseLine("let a = [0; 1; 2; 3] in a[0]") ==
+        Let(VarLit("a"), ArrayLit(List(IntLit(0), IntLit(1), IntLit(2), IntLit(3))), ArrayApp(VarLit("a"), IntLit(0))))
+    }
+
     describe("compare expr")  {
       assert(parseLine("1 < 2") == Prim(Op("<"), IntLit(1), IntLit(2)))
       assert(parseLine("1 == 2") == Prim(Op("=="), IntLit(1), IntLit(2)))

@@ -36,6 +36,10 @@ class BasicParser extends BaseParser {
   private lazy val COMPS = """(==|<|>)""".r ^^ { case e => Op(e) }
   private lazy val comp: Pe = expr ~ COMPS ~ expr ^^ { case e1 ~ op ~ e2 => Prim(op, e1, e2) }
 
+  private lazy val ary: Pe = LB ~> (expr ~ aryargs) <~ RB ^^ { case e ~ ArrayLit(es) => ArrayLit(e :: es) }
+  private lazy val aryargs: Pe = (SCOLON ~> expr).* ^^ { case e => ArrayLit(e) }
+  protected lazy val aryapp: Pe = id ~ (LB ~> expr <~ RB) ^^ { case n ~ idx => ArrayApp(n, idx) }
+
   lazy val term: Pe = fact ~ termR.* ^^ { case l ~ r => makeBinExpr(l, r) }
 
   def fact: Pe = bool | double | int | id | LPAREN ~> expr <~ RPAREN
@@ -46,7 +50,7 @@ class BasicParser extends BaseParser {
 
   def prog: Pp = (expr <~ EOL).* ^^ { case e => Prog(e) }
 
-  var expr: Pe = fun | ifexp | let | app | comp | term ~ exprR.* ^^ {
+  var expr: Pe = fun | ifexp | let | app | aryapp | ary | comp | term ~ exprR.* ^^ {
     case l ~ r => makeBinExpr(l, r)
   }
 
