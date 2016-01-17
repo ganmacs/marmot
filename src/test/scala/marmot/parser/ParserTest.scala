@@ -56,7 +56,6 @@ class ParserTest extends FunSpec {
     describe("defi operator Parser") {
       parseWithOprator("src/test/resouces/operator") match {
         case Right(Prog(x)) => {
-          assert(x(0) == Empty())
           assert(x(1) == IfExp(BoolLit(true), IntLit(8), IntLit(9)))
         }
         case Left(x) => throw new Exception(x)
@@ -66,8 +65,6 @@ class ParserTest extends FunSpec {
     describe("select Parser") {
       parseWithOprator("src/test/resouces/select") match {
         case Right(Prog(x)) => {
-          assert(x(0) == Empty())
-          assert(x(1) == Empty())
           assert(x(2) == IfExp(BoolLit(true), IntLit(10), Prim(Op("+"), IntLit(9), IntLit(10))))
         }
         case Left(x) => throw new Exception(x)
@@ -76,21 +73,19 @@ class ParserTest extends FunSpec {
 
     describe("add") {
       parseWithOprator("src/test/resouces/add") match {
-        case Right(Prog(x)) => {
-          assert(x(0) == Empty())
-          assert(x(1) == IntLit(1000))
-        }
+        case Right(Prog(x)) => assert(x(1) == IntLit(1000))
         case Left(x) => throw new Exception(x)
       }
     }
 
+        case Left(x) => throw new Exception(x)
+      }
+    }
+
+
     describe("multiple_parser") {
       val ret =  parseWithOprator("src/test/resouces/multi_parser") match {
         case Right(Prog(x)) => {
-          assert(x(0) == Empty())
-          assert(x(1) == Empty())
-          assert(x(2) == Empty())
-          assert(x(3) == Empty())
           assert(x(4) == Prim(Op("+"), Prim(Op("-"), IntLit(1), IntLit(2)), Prim(Op("+"), IntLit(1), IntLit(2))))
         }
         case Left(x) => throw new Exception(x)
