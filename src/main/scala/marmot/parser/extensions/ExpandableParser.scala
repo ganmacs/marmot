@@ -5,7 +5,6 @@ import scala.collection.mutable.{Map => MMap}
 
 class ExpandableParser extends BasicParser {
   protected var parserMap: MMap[String, ExpandableParser] = MMap.empty[String, ExpandableParser]
-  private var context: Option[String] = None
 
   // Assosiate builed parser with semantics
   def expandSyntax(exprs: List[Expr], semantics: Expr): Unit = {
@@ -17,9 +16,16 @@ class ExpandableParser extends BasicParser {
     }
   }
 
-  private def expandMacro(expr: Expr, m: MMap[String, Expr]): Expr = expr match {
+  private def expandMacro(expr: Expr, m: MMap[String, List[Expr]]): Expr = expr match {
     case v@VarLit(x) => m.get(x) match {
-      case Some(ex) => ex
+      case Some(ex) => {
+        if (ex.size >= 1) {
+          m.put(x, ex.drop(1))
+        } else {
+          m -= x
+        }
+        ex(0)
+      }
       case None => v // Not macro. Return default value.
     }
     case Prim(x, e1, e2) => {
@@ -47,6 +53,9 @@ class ExpandableParser extends BasicParser {
       case Some(m) => m
       case None => {
         val p = new ExpandableParser
+        // initialize every parser has ("*" => OperatorParesr) in paserMap
+        // TODO may be ,passing just parent map is better
+        p.parserMap.put("*", parserMap("*"))
         parserMap.put(v, p)
         p
       }
@@ -54,12 +63,15 @@ class ExpandableParser extends BasicParser {
   }
 
   // Convert Exprs to micro parsers
-  private def convertExprsToParsers(exprs: List[Expr]): (List[Parser[Expr]], MMap[String, Expr]) = {
-    val m = MMap.empty[String, Expr]
+  private def convertExprsToParsers(exprs: List[Expr]): (List[Parser[Expr]], MMap[String, List[Expr]]) = {
+    val m = MMap.empty[String, List[Expr]]
     val r = exprs.map {
       case VarLit(x) => x ^^ { case e => Empty() }
       case VarWithContext(VarLit(x), c) => p(c).expr.asInstanceOf[Parser[Expr]] ^^ {
-        case v => m.put(x, v); Empty()
+        case v => m.get(x) match {
+          case Some(xx) => m.put(x, v :: xx)
+          case None => m.put(x, List(v))
+        }; Empty()
       }
       case x => throw new Exception("Unknow Token: " + x)
     }
@@ -67,7 +79,7 @@ class ExpandableParser extends BasicParser {
   }
 
   // Build micro parsers and then fold them to big parser.
-  private def buildParser(exprs: List[Expr]): (PackratParser[Expr], MMap[String, Expr]) = {
+  private def buildParser(exprs: List[Expr]): (PackratParser[Expr], MMap[String, List[Expr]]) = {
     convertExprsToParsers(exprs) match {
       case (parsers, m) => {
         val parser = parsers.tail.foldLeft(parsers.head) { (a, b) => a ~ b ^^^ Empty() }

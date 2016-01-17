@@ -78,6 +78,16 @@ class ParserTest extends FunSpec {
       }
     }
 
+    describe("ast_cotnext") {
+      parseWithOprator("src/test/resouces/ast_context") match {
+        case Right(Prog(x)) => assert(
+          x(3) == Prim(Op("+"),
+            Prim(Op("-"),
+              Prim(Op("+"), Prim(Op("-"), IntLit(1), IntLit(2)),
+                            Prim(Op("*"), IntLit(5), IntLit(6))),
+              IntLit(3)),
+            Prim(Op("*"), IntLit(7), IntLit(8))
+          ))
         case Left(x) => throw new Exception(x)
       }
     }
