@@ -5,41 +5,16 @@ import scala.collection.mutable.{Map => MMap}
 
 class ExpandableParser extends BasicParser {
   protected var parserMap: MMap[String, ExpandableParser] = MMap.empty[String, ExpandableParser]
-  private var context: Option[String] = None
 
   // Assosiate builed parser with semantics
   def expandSyntax(exprs: List[Expr], semantics: Expr): Unit = {
-    buildParser(exprs) match {
-      case (parser, map) => {
-        val tmp = expr
-        expr = parser ^^ { case _ => expandMacro(semantics, map) } | tmp
-      }
-    }
+    val (parser, map) = buildParser(exprs)
+    val tmp = expr
+    expr = parser ^^ { case _ => expandMacro(semantics, map) } | tmp
   }
 
-  def doInNS(ns: String, f: => Unit) = {
-    context = Some(ns); f; context = None
-  }
-
-  private def p: ExpandableParser = context match {
-    case None => this
-    case Some(v) => {
-      parserMap.get(v) match {
-        case Some(m) => m
-        case None => {
-          val p = new ExpandableParser
-          parserMap.put(v, p)
-          p
-        }
-      }
-    }
-  }
-
-  private def expandMacro(expr: Expr, m: MMap[String, Expr]): Expr = expr match {
-    case v@VarLit(x) => m.get(x) match {
-      case Some(ex) => ex
-      case None => v // Not macro. Return default value.
-    }
+  private def expandMacro(expr: Expr, m: MacroMap): Expr = expr match {
+    case v@VarLit(x) => m.getOrElse(x, v)
     case Prim(x, e1, e2) => {
       val ne1 = expandMacro(e1, m)
       val ne2 = expandMacro(e2, m)
@@ -59,28 +34,62 @@ class ExpandableParser extends BasicParser {
     case e => e
   }
 
+  private def p(c :Context): ExpandableParser = {
+    val Context(v) = c
+    parserMap.get(v) match {
+      case Some(m) => m
+      case None => {
+        val p = new ExpandableParser
+        // initialize every parser has ("*" => OperatorParesr) in paserMap
+        p.parserMap.put("*", parserMap("*"))
+        p.parserMap.put(v, p)
+        parserMap.put(v, p)
+        p
+      }
+    }
+  }
+
   // Convert Exprs to micro parsers
-  private def convertExprsToParsers(exprs: List[Expr]): (List[Parser[Expr]], MMap[String, Expr]) = {
-    val m = MMap.empty[String, Expr]
+  private def convertExprsToParsers(exprs: List[Expr]): (List[Parser[Expr]], MacroMap) = {
+    val m = new MacroMap()
     val r = exprs.map {
       case VarLit(x) => x ^^ { case e => Empty() }
-      case IntLit(_) => p.int.asInstanceOf[Parser[Expr]]
-      case DoubleLit(_) => p.double.asInstanceOf[Parser[Expr]]
-      case BoolLit(_) => p.bool.asInstanceOf[Parser[Expr]]
-      case Prim(x, e1, e2) => p.bool.asInstanceOf[Parser[Expr]]
-      case OperatorVar(VarLit(x)) => p.expr.asInstanceOf[Parser[Expr]] ^^ { case v => m.put(x, v); Empty() }
-      case _ => "" ^^^ Empty()
+      case VarWithContext(VarLit(x), c) => p(c).expr.asInstanceOf[Parser[Expr]] ^^ {
+        case v => m.put(x, v); Empty()
+      }
+      case x => throw new Exception("Unknow Token: " + x)
     }
     (r, m)
   }
 
   // Build micro parsers and then fold them to big parser.
-  private def buildParser(exprs: List[Expr]): (PackratParser[Expr], MMap[String, Expr]) = {
-    convertExprsToParsers(exprs) match {
-      case (parsers, m) => {
-        val parser = parsers.tail.foldLeft(parsers.head) { (a, b) => a ~ b ^^^ Empty() }
-        (parser, m)
+  private def buildParser(exprs: List[Expr]): (PackratParser[Expr], MacroMap) = {
+    val (parsers, m) = convertExprsToParsers(exprs)
+    val parser = parsers.tail.foldLeft(parsers.head) { (a, b) => a ~ b ^^^ Empty() }
+    (parser, m)
+  }
+
+  // Macro map is a Map. Data structure its value is a stack.
+  private class MacroMap {
+    val m = MMap.empty[String, List[Expr]]
+
+    def put(k: String, v: Expr) = m.get(k) match {
+      case Some(xx) => m.put(k, v :: xx)
+      case None => m.put(k, List(v))
+    }
+
+    def getOrElse(k: String, a: Expr): Expr = get(k).getOrElse(a)
+
+    def get(k: String): Option[Expr] = m.get(k) match {
+      case Some(xx) => {
+        if (xx.size >= 1) {
+          m.put(k, xx.drop(1))
+        } else {
+          m -= k
+        }
+        Some(xx(0))
       }
+      case None => None
     }
   }
 }

@@ -7,9 +7,9 @@ class BasicParser extends BaseParser {
   type Pp = PackratParser[Prog]
 
   protected lazy val int: Pe = INT ^^ { case e => IntLit(e.toInt) }
-  protected val double: Pe = DOUBLE ^^ { case e => DoubleLit(e.toDouble) }
-  protected val id: PackratParser[VarLit] = ID ^^ { case e => VarLit(e) }
-  protected val bool: Pe = TRUE ^^ { case _ => BoolLit(true) } | FALSE ^^ { case _ => BoolLit(false) }
+  protected lazy val double: Pe = DOUBLE ^^ { case e => DoubleLit(e.toDouble) }
+  protected lazy val id: PackratParser[VarLit] = ID ^^ { case e => VarLit(e) }
+  protected lazy val bool: Pe = TRUE ^^ { case _ => BoolLit(true) } | FALSE ^^ { case _ => BoolLit(false) }
 
   protected lazy val EOL = "\n" | "\r\n" | "\r" | SCOLON
   protected lazy val args = id.*
@@ -33,9 +33,16 @@ class BasicParser extends BaseParser {
     case s ~ e => Fun(s, e)
   }
 
+  private lazy val COMPS = """(==|<|>)""".r ^^ { case e => Op(e) }
+  private lazy val comp: Pe = expr ~ COMPS ~ expr ^^ { case e1 ~ op ~ e2 => Prim(op, e1, e2) }
+
+  private lazy val ary: Pe = LB ~> (expr ~ aryargs) <~ RB ^^ { case e ~ ArrayLit(es) => ArrayLit(e :: es) }
+  private lazy val aryargs: Pe = (SCOLON ~> expr).* ^^ { case e => ArrayLit(e) }
+  protected lazy val aryapp: Pe = id ~ (LB ~> expr <~ RB) ^^ { case n ~ idx => ArrayApp(n, idx) }
+
   lazy val term: Pe = fact ~ termR.* ^^ { case l ~ r => makeBinExpr(l, r) }
 
-  def fact: Pe = bool | double | int | id | LPAREN ~> expr <~ RPAREN
+  def fact: Pe = fun | ifexp | let | app | aryapp | ary | bool | double | int | id | LPAREN ~> expr <~ RPAREN
 
   protected def makeBinExpr(le: Expr , re: List[(Op, Expr)]) = {
     re.foldLeft(le) { case (a, (op, e)) => Prim(op, a, e) }
@@ -43,7 +50,7 @@ class BasicParser extends BaseParser {
 
   def prog: Pp = (expr <~ EOL).* ^^ { case e => Prog(e) }
 
-  var expr: Pe = fun | ifexp | let | app | term ~ exprR.* ^^ {
+  var expr: Pe = comp | term ~ exprR.* ^^ {
     case l ~ r => makeBinExpr(l, r)
   }
 

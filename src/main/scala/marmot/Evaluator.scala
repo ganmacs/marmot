@@ -14,18 +14,38 @@ object Evaluator {
       case Some(x) => x
       case None => throw new Exception(s"Unknow variable: $x")
     }
+    case ArrayLit(x) => {
+      val xx = x.map(eval(_, env))
+      ArrayValue(xx)
+    }
+    case ArrayApp(VarLit(name), idx) => env.get(name) match {
+      case Some(ArrayValue(ary)) => {
+        eval(idx, env) match {
+          case IntValue(i) => ary(i)
+          case x  => throw new Exception(s"Array access is only Int but $x")
+        }
+      }
+      case Some(other) => throw new Exception(s"Required Array but $other")
+      case None => throw new Exception(s"Unknow variable: $name")
+    }
     case Prim(op, e1, e2) => (eval(e1, env), eval(e2, env)) match {
       case (IntValue(x), IntValue(y)) => op match {
         case Op("+") => IntValue(x + y)
         case Op("-") => IntValue(x - y)
         case Op("*") => IntValue(x * y)
         case Op("/") => IntValue(x / y)
+        case Op("==") => BoolValue(x == y)
+        case Op("<") => BoolValue(x < y)
+        case Op(">") => BoolValue(x > y)
       }
       case (DoubleValue(x), DoubleValue(y)) => op match {
         case Op("+.") => DoubleValue(x + y)
         case Op("-.") => DoubleValue(x - y)
         case Op("*.") => DoubleValue(x * y)
         case Op("/.") => DoubleValue(x / y)
+        case Op("==") => BoolValue(x == y)
+        case Op("<") => BoolValue(x < y)
+        case Op(">") => BoolValue(x > y)
       }
       case (_, _) => throw new Exception("Unmatched type")
     }
