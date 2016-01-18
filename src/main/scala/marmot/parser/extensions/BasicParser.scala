@@ -39,6 +39,9 @@ class BasicParser extends BaseParser {
   private lazy val ary: Pe = LB ~> (expr ~ aryargs) <~ RB ^^ { case e ~ ArrayLit(es) => ArrayLit(e :: es) }
   private lazy val aryargs: Pe = (SCOLON ~> expr).* ^^ { case e => ArrayLit(e) }
   protected lazy val aryapp: Pe = id ~ (LB ~> expr <~ RB) ^^ { case n ~ idx => ArrayApp(n, idx) }
+  protected lazy val consAry: Pe = expr ~ ("::" ~> expr) ^^ {
+    case e1 ~ e2 => ArrayCons(e1, e2)
+  }
 
   lazy val term: Pe = fact ~ termR.* ^^ { case l ~ r => makeBinExpr(l, r) }
 
@@ -50,7 +53,7 @@ class BasicParser extends BaseParser {
 
   def prog: Pp = (expr <~ EOL).* ^^ { case e => Prog(e) }
 
-  var expr: Pe = comp | term ~ exprR.* ^^ {
+  var expr: Pe = consAry | comp | term ~ exprR.* ^^ {
     case l ~ r => makeBinExpr(l, r)
   }
 

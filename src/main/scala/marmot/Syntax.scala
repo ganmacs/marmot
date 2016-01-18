@@ -12,6 +12,7 @@ case class BoolLit(v: Boolean) extends Expr
 case class VarLit(v: String) extends Expr
 case class ArrayLit(v: List[Expr]) extends Expr
 case class ArrayApp(name: VarLit, idx: Expr) extends Expr
+case class ArrayCons(car: Expr, cdr: Expr) extends Expr
 case class Fun(args: List[VarLit], body: Expr) extends Expr
 case class App(name: VarLit, body: List[Expr]) extends Expr
 case class Prim(op: Op, e1: Expr, e2: Expr) extends Expr

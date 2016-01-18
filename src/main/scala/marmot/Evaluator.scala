@@ -28,6 +28,10 @@ object Evaluator {
       case Some(other) => throw new Exception(s"Required Array but $other")
       case None => throw new Exception(s"Unknow variable: $name")
     }
+    case ArrayCons(e1, e2) => (eval(e1, env), eval(e2, env)) match {
+      case (f@_, ArrayValue(xx)) => ArrayValue(f :: xx)
+      case (x, y) => throw new Exception(s"invalid cons $x :: $y")
+    }
     case Prim(op, e1, e2) => (eval(e1, env), eval(e2, env)) match {
       case (IntValue(x), IntValue(y)) => op match {
         case Op("+") => IntValue(x + y)

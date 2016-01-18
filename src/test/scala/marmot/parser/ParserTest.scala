@@ -34,6 +34,7 @@ class ParserTest extends FunSpec {
 
     describe("array") {
       assert(parseLine("[0; 1; 2; 3]") == ArrayLit(List(IntLit(0), IntLit(1), IntLit(2), IntLit(3))))
+      assert(parseLine("1 :: [2; 3]") == ArrayCons(IntLit(1), ArrayLit(List(IntLit(2), IntLit(3)))))
       assert(parseLine("let a = [0; 1; 2; 3] in a[0]") ==
         Let(VarLit("a"), ArrayLit(List(IntLit(0), IntLit(1), IntLit(2), IntLit(3))), ArrayApp(VarLit("a"), IntLit(0))))
     }
